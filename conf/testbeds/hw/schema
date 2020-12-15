@@ -1,0 +1,114 @@
+# Copyright (C) 2010  Internet Systems Consortium, Inc. ("ISC")
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+# OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+# $Id: schema 1001 2010-11-30 18:56:00Z pselkirk $
+
+Figure:
+------
+                                  Switched Ethernet
+/----------\                             ||
+|          |          +------------+     ||
+| Internet |-- ADSL --|Home Gateway|-----||                   WAN side
+|          |          | router/NAT |     ||-----------\
+\----------/          +------------+     ||           |          ^
+                                                      | eth0     |
+                                                  +-------+      |
+                                                  |       |      |
+                  +----+          ||              | AFTR  |
+              ....| B4 |----------||              |       |      |
+              .   +----+          ||              +-------+      |
++--------+    .                   ||                  | eth1     |
+| client |..../                   ||                  |          V
++--------+    .   +----+          ||------------------/
+              ....| B4 |----------||                          LAN side
+                  +----+          ||
+                                  ||
+                           Switched Ethernet
+
+Description:
+-----------
+
+The Internet connection is through an ADSL line with an IPv6 /64 prefix (6rd)
+and a fixed IPv4 address (so the ISP provided Home Gateway can be configured
+as a router/NAT with port forwarding).
+In the whole schema, the WAN side is towards the Internet, the LAN side is
+the other direction. Note this is relative to a box, i.e., a B4 WAN side
+is connected to the AFTR LAN side.
+
+Testbed boxes:
+-------------
+
+The AFTR is a Lenovo netbook running Linux RedHat (RHEL 5) with a 2.6.18
+kernel (patched because of the IPv4-in-IPv6 tunnel bug). It provides:
+ - AFTR service (cf. aftr.conf and aftr-script files)
+ - DHCPv6 service (cf. aftr-dhcpd6.conf file)
+ - DNS recursive/caching service (cf. aftr-named.conf file)
+It has two Ethernet interfaces (builtin + Express Card) named eth0 and eth1
+(the hardware addresses are in the ifcfg-eth* files so the names are
+stable between reboots, on some other Linux distribs this is performed
+by a "persistent" net rule in /etc/udev/rules.d). The eth1/LAN/Express
+Card board is a gigabit Ethernet which should support larger MTUs.
+
+The internal switched Ethernet between the AFTR and B4 boxes is done
+with a 5 port gigabit Ethernet switch. The MTU is 1500 but most
+gigabit Ethernet NICs support more, here the limit is in the B4 boxes.
+
+The 3 B4 boxes are Linksys WRT54GL 1.1 (one from Comcast with the AFTR
+and client, the second from Fry's) and Netgear WNDR3700 (from Juniper).
+Linksys run the Comcast dslite and Netgear the xalient ipv6tunnel GUIs
+so only the DHCPv6 client config (b4-dhclient.conf file) is provided.
+They support:
+ - IPv4-in-IPv6 tunnel with the AFTR box
+ - dynamic (via DHCPv6) or static (Web interface) config
+ - DHCPv4 server for the LAN side
+ - DNS relay (done with the DHCPv4 service by dnsmasq)
+ - IPv6 routing for the LAN side (useless because the ISP provides only
+  an IPv6 /64 prefix and the alternate ISP (not on the figure) no IPv6
+  nor a fixed IPv4 address...)
+(current dnsmasq default config limits the EDNS.0 packet size to 1280,
+look at the B4 software notes to change it to 4096 or wait for the next
+release).
+
+The client is an ACER AspireOne netbook running Ubuntu and Windows XP.
+The only testbed specific software is (for both systems) a SSH client.
+It can be connected to any of the B4 boxes or to the Home Gateway in
+a transparent way (DHCPv4 client).
+
+Addresses:
+---------
+
+The Home Gateway provides addresses in 192.168.0.0/24, 192.168.0.111 is
+out of its DHCPv4 server range: no possible collision at the expense
+of a proxy ARP entry. The real (i.e., provided by the HG) AFTR eth0
+address is 192.168.0.17 (this address is wired in the named.conf file,
+please fix it).
+The AFTR/B4 switched Ethernet has no IPv4 addresses. Tunnels over it
+are numbered 192.0.0.1 (AFTR) and 192.0.0.2 (B4) in the "unpublished"
+draft prefix.
+B4 LANs are managed by dnsmasq, B4 boxes get 192.168.1.1 and the client
+an address in the 192.168.1.20-40 range (this address doesn't matter
+at the exception of port forwarding).
+
+The real public address can be shared (cf. aftr-shareone.conf and
+aftr-shareone-script). In any case iptables and ip6tables must be
+flushed before launching the AFTR daemon or DHCPv6 server.
+
+The Home Gateway announces a 6rd /64 IPv6 prefix. The AFTR eth0 is
+autoconfigured by received Router Advertisement but this prefix cannot
+be subnetted (too small and no routing).
+The AFTR/B4 switched Ethernet gets the 2001:240:63f:ff00::/64 prefix
+(in a JPNIC /48 prefix allocated to Comcast for a demo?). The AFTR tunnel
+end-point address is 2001:240:63f:ff01::1 (note: it must not be in the
+same prefix).
+B4 LANs get /64 prefixes but as explained before they can't be routed.

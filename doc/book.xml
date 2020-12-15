@@ -1,0 +1,1215 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+              "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+              [<!ENTITY mdash "&#8212;">]>
+<!--
+ - Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<!-- File:  $Id: book.xml 1001 2010-11-30 18:56:00Z pselkirk $ -->
+<book xmlns:xi="http://www.w3.org/2001/XInclude">
+  <title>Address Family Transition Router Manual</title>
+
+  <bookinfo>
+    <copyright>
+      <year>2009</year>
+      <year>2010</year>
+      <holder>Internet Systems Consortium, Inc. ("ISC")</holder>
+    </copyright>
+  </bookinfo>
+
+  <chapter>
+    <title>INTRODUCTION</title>
+    <para>
+      ISC AFTR implements a Dual-Stack Lite (DS-Lite) Address Family
+      Transition Router (<acronym>AFTR</acronym>), as described in
+      <filename>draft-ietf-softwire-dual-stack-lite-06.txt</filename>.
+      This technology allows end-users with IPv4-only hosts or
+      IPv4-only applications to communicate with IPv4 peers over an
+      IPv6-only network.
+    </para>
+    <para>
+      A DS-Lite deployment includes at least one AFTR in the ISP's
+      network core, and one Basic Bridging BroadBand element
+      (<acronym>B4</acronym>) at each customer premises.
+    </para>
+
+    <sect1>
+       <title>Work in Progress</title>
+       <para>
+	 DS-Lite is in the process of being standardized by the
+	 Softwire working group of the IETF.  ISC AFTR actively tracks
+	 the current specification, but users should be aware that
+	 there may be changes to the specification before it is
+	 finalized as an RFC.  As such, this should be considered a
+	 work in progress, for testing and experimentation only.
+       </para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>GETTING STARTED</title>
+    <para>
+      This section provides a "quick start" to using ISC AFTR in the
+      simplest configuration.  For full build and configuration
+      details, see chapter 3.
+    </para>
+
+    <sect1>
+      <title>Setting Up AFTR</title>
+      <sect2>
+	<title>System Requirements for AFTR</title>
+	<para>
+	  <itemizedlist>
+            <listitem>
+              <para>
+		OS: Linux or FreeBSD.  Kernel must be built with IPv6
+		and <refentrytitle>tun</refentrytitle><manvolnum>4</manvolnum>.
+              </para>
+              <para>
+		Linux kernel version must be greater than 2.6.26, to
+		correct a small-packet-drop problem in
+		<function>tunnel46_rcv()</function>.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+		CPU: No special requirement.  Note that performance is
+		bound to the kernel/user context switch latency, so
+		processor speed is the single biggest determiner of
+		performance.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+		Memory: No special requirement.
+              </para>
+            </listitem>
+	  </itemizedlist>
+	</para>
+      </sect2>
+
+      <sect2>
+	<title>Building AFTR</title>
+	<para>
+	  Unpack the distribution.
+	</para>
+	<para>
+	  <userinput>tar zxvpf aftr-1.1.tar.gz</userinput>
+	</para>
+	<para>
+	  This creates a a directory named <filename>aftr-1.1</filename>,
+	  which we refer to as <varname>$src_path</varname> hereafter.
+	</para>
+	<para>
+	  <userinput>cd $src_path</userinput><sbr/>
+	  <userinput>./configure</userinput><sbr/>
+	  <userinput>make</userinput>
+	</para>
+	<para>
+	  This creates an executable file <filename>aftr</filename>,
+	  which is the AFTR daemon program.  It is expected to be run
+	  in the same directory as the configuration
+	  file <filename>aftr.conf</filename> and the script
+	  file <filename>aftr-script</filename> (there is
+	  no <userinput>make install</userinput> step).
+	</para>
+      </sect2>
+
+      <sect2>
+	<title>Minimal AFTR Configuration</title>
+	<para>
+	  An example <filename>aftr.conf</filename> file is located in
+	  the <filename>conf</filename> directory.
+	</para>
+	<para>
+	  The only required parameters are those in section 1 of the
+	  config file, and are briefly described here.  The full set
+	  of configuration commands is described in section 3.3.
+	</para>
+	<para>
+	  <userinput>address endpoint 2001::1</userinput>
+	</para>
+	<para>
+	  This is the IPv6 address of the AFTR.  Specifically, it is the
+	  endpoint of the IPv6 tunnel between the B4 and the AFTR.
+	</para>
+	<para>
+	  This address is associated with the tunnel interface, but is
+	  not explicitly assigned to it; instead, the
+	  <function>aftr-start()</function> portion of the script file
+	  creates a covering route to the tunnel interface.
+	</para>
+	<para>
+	  <userinput>address icmp 192.0.0.1</userinput>
+	</para>
+	<para>
+	  This is a global IPv4 address used as the source for ICMP errors
+	  sent from the AFTR to the Internet.  The actual address doesn't
+	  matter, as no one should try to respond to an ICMP packet.
+	</para>
+	<para>
+	  <userinput>acl6 2001::/48</userinput>
+	</para>
+	<para>
+	  This is an Access Control List for IPv6 traffic from the B4 to the
+	  AFTR.  It is the IPv6 prefix that encloses the portion of the
+	  provider's network that is served by this AFTR.  If the AFTR serves
+	  customers served by multiple disjoint IPv6 prefixes, there can be
+	  multiple <command>acl6</command> commands.
+	</para>
+	<para>
+	  <userinput>pool 198.18.200.1</userinput>
+	</para>
+	<para>
+	  This is a global IPv4 address in the service provider's
+	  network, which will be used as the NATted address for
+	  packets sent to the Internet.
+	</para>
+	<para>
+	  Multiple pool addresses may be defined, and restrictions may
+	  be placed on port ranges to use for NAT bindings.
+	</para>
+      </sect2>
+
+      <sect2>
+	<title>AFTR Script</title>
+	<para>
+	  The <command>aftr</command> executable requires a
+	  startup/shutdown script.  When <command>aftr</command>
+	  starts up, it calls the script's <function>start</function>
+	  function to bring up the tunnel interface, and set up routes
+	  to the interface.
+	</para>
+	<para>
+	  When <command>aftr</command> shuts down, it calls the
+	  script's <function>stop</function> function to bring down
+	  the tunnel interface, and remove all routes to the
+	  interface.
+	</para>
+	<para>
+	  By default, the script file is
+	  named <filename>aftr-script</filename>, and resides in the
+	  same directory as the <filename>aftr</filename> executable
+	  file.
+	</para>
+	<para>
+	  The <filename>conf</filename> directory contains example
+	  <filename>aftr-script</filename> files for Linux and FreeBSD.
+	</para>
+      </sect2>
+
+      <sect2>
+	<title>Running AFTR</title>
+	<para>
+	  First, make sure your interfaces are configured correctly,
+	  and IPv4 and IPv6 forwarding are enabled.  On Linux, you may
+	  also want to disable <command>netfilter</command>
+	  for performance reasons.
+	</para>
+	<para>
+	  Note: Linux 
+	  netfilter tables need to be flushed ('<userinput>iptables
+	  -F</userinput>' and '<userinput>ip6tables -F</userinput>')
+	  explicitly.
+	</para>
+	<para>
+	  To start AFTR, run the <filename>aftr</filename> executable
+	  in the same directory as the <filename>aftr.conf</filename>
+	  configuration file and the
+	  <filename>aftr-script</filename> script file.  For other
+	  startup options, see section 3.2.
+	</para>
+	<para>
+	  AFTR normally starts as a daemon process.  To access the
+	  control interface, <command>telnet</command> to localhost
+	  port 1015.  AFTR can also be started in foreground mode,
+	  which gives immediate access to the control interface.  For
+	  control commands, see section 3.4.
+	</para>
+      </sect2>
+    </sect1>
+
+    <sect1>
+      <title>Setting Up B4</title>
+      <para>
+	The B4 is the customer-side DS-Lite tunnel initiator.  In the
+	most common use case, it is a home gateway, also referred to
+	as a CPE (Customer Premises Equipment).
+      </para>
+      <para>
+	For testing and demonstration purposes, we have used home
+	gateways (e.g., Linksys WRT54GL) running OpenWrt, a Linux
+	distribution tailored for home gateways and related devices.
+	B4 functionality can also be built into general-purpose
+	computers, and has been demonstrated in FreeBSD and Ubuntu
+	Linux.  In all of these cases, the important thing to keep in
+	mind is that the B4 device is the IPv4 default router for all
+	hosts behind it.
+      </para>
+
+      <sect2>
+	<title>System Requirements for B4</title>
+	<para>
+	  There are no special requirements above what one might
+	  expect for a home gateway.  The only added functionality
+	  that makes it a B4 is to set up an IPv4-in-IPv6 tunnel, and
+	  to encapsulate/decapsulate all IPv4 traffic to/from that
+	  tunnel; and all home gateways that can run OpenWrt can do
+	  that.
+	</para>
+      </sect2>
+
+      <sect2>
+	<title>Building B4</title>
+	<para>
+	  Note: More information, and prebuilt images for WRT54G
+	  devices, can be found at
+	  <uri>http://www.kangaroo.comcast.net</uri>
+	</para>
+	<para>
+	  The following instructions are for building an OpenWrt image
+	  from sources.
+	</para>
+	<orderedlist>
+	  <listitem>
+	    <para>
+	      Get OpenWrt sources from
+	      <uri>https://dev.openwrt.org</uri>
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Copy the contents of the
+	      <filename>conf/b4-openwrt</filename> directory to a new
+	      directory named
+	      openwrt/<replaceable>version</replaceable>/package/dhcp4
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Go to the openwrt/<replaceable>version</replaceable>
+	      directory, run <command>make menuconfig</command>, and
+	      make the following selections:
+	    </para>
+	    <itemizedlist>
+	      <listitem>
+		<para>
+		  Select 2.6 kernel: Target System &gt; Broadcom
+		  BCM947xx/953xx (or your target architecture)
+		</para>
+	      </listitem>
+	      <listitem>
+		<para>
+		  Deselect busybox udhcp client: Base system &gt;
+		  busybox &gt; Configuration &gt; Networking Utilities
+		</para>
+	      </listitem>
+	      <listitem>
+		<para>
+		  Select dhcp4-client and dhcpv6: Network &gt; isc-dhcp
+		</para>
+	      </listitem>
+	      <listitem>
+		<para>
+		  Select the non-busybox version of
+		  <command>ip</command>: Network &gt; ip
+		</para>
+	      </listitem>
+	      <listitem>
+		<para>
+		  Select ip6-tunnel: Kernel modules &gt; Network
+		  Support &gt; kmod-ip6-tunnel
+		</para>
+	      </listitem>
+	    </itemizedlist>
+	  </listitem>
+	</orderedlist>
+      </sect2>
+    </sect1>
+
+    <sect1>
+      <title>Other Setup</title>
+      <sect2>
+	<title>DHCPv6 Configuration</title>
+	<para>
+	  <filename>draft-ietf-softwire-dual-stack-lite-06.txt</filename>
+	  says:
+	</para>
+	<blockquote><para>
+	  In order to configure the IPv4-in-IPv6 tunnel, the B4
+	  element needs the IPv6 address of the AFTR element.  This
+	  IPv6 address can be configured using a variety of methods,
+	  ranging from an out-of-band mechanism, manual configuration
+	  or a variety of DHCPv6 options.
+	</para>
+	<para>
+	  In order to guarantee interoperability, a B4 element SHOULD implement
+	  the DHCPv6 option defined in
+	  [I-D.ietf-softwire-ds-lite-tunnel-option].
+	</para></blockquote>
+	<para>
+	  The DHCP server does not have to run on the same computer as
+	  the AFTR, but it must be reachable via normal DHCP request
+	  channels from the B4, and it must be configured with the
+	  AFTR address.
+	</para>
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      On the server, add something like the following
+	      to <filename>dhcpd6.conf</filename>:
+	    </para>
+	    <para>
+	      <userinput>option dhcp6.dslite code 54 = ip6-address;<sbr/>
+		option dhcp6.dslite 2001::1;</userinput>
+	    </para>
+	    <para>
+	      NOTE: For testing, we use an unassigned DHCPv6 option code.
+	      DO NOT use this option code in production, as it is likely
+	      to change when the draft reaches RFC status.
+	    </para>
+	    <para>
+	      The IPv6 address must be the same as the
+	      <userinput>address endpoint</userinput> option
+	      in <filename>aftr.conf</filename>.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      On the B4, <filename>dhclient6.conf</filename> contains the
+	      following to request the option:
+	    </para>
+	    <para>
+	      <userinput>option dhcp6.dslite code 54 = ip6-address;<sbr/>
+		also request dhcp6.dslite;</userinput>
+	    </para>
+	    <para>
+	      If you are using the supplied OpenWrt dhcp4 package,
+	      <filename>dhclient6.conf</filename> already contains these
+	      lines, and <filename>dhclient-script</filename> contains a
+	      few extra lines to set up the tunnel and create a default
+	      IPv4 route to it.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+      </sect2>
+
+      <sect2>
+	<title>DNS Configuration</title>
+	<para>
+	  <filename>draft-ietf-softwire-dual-stack-lite-06.txt</filename>
+	  recommends configuring the B4 with a DNS proxy resolver,
+	  which will forward queries to an external recursive server
+	  over IPv6 (this server may be co-located on the AFTR box).
+	</para>
+	<para>
+	  To configure the B4 with an upstream resolver address, add something
+	  like the following to dhcpd6.conf:
+	</para>
+	<para>
+	  <userinput>option dhcp6.name-servers 3ffe:501:ffff:100:200:ff:fe00:3f3e;</userinput>
+	</para>
+	<para>
+	  Note: if the B4 uses <command>dnsmasq</command> as a DNS
+	  proxy, then the used version should be checked.  Only recent
+	  versions are RFC 5625 compliant; in particular the EDNS0 UDP
+	  size can be limited to 1280 bytes instead of the recommended
+	  4096 bytes.
+	</para>
+	<para>
+	  It is easy to fix this last point by configuration:
+	</para>
+	<para>
+	  <itemizedlist>
+            <listitem>
+	      <para>
+		Add in <filename>/etc/config/dhcp</filename> in the
+		dnsmasq section the line:
+	      </para>
+	      <para>
+		<userinput>option ednspacket_max 4096</userinput>
+	      </para>
+            </listitem>
+            <listitem>
+	      <para>
+		If <command>dnsmasq</command> is launched directly,
+		add these arguments:
+	      </para>
+	      <para>
+		<userinput>-P 4096</userinput>
+	      </para>
+	    </listitem>
+	  </itemizedlist>
+	</para>
+      </sect2>
+
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>AFTR MANUAL</title>
+    <sect1>
+       <title>Compile Flags</title>
+       <para>
+         Here is the list of configuration flags
+         (i.e., <varname>CFLAGS</varname>):
+         <itemizedlist>
+           <listitem>
+           <para><varname>AFTRCONFIG</varname>: config file path
+             (default <filename>aftr.conf</filename>)</para>
+           </listitem>
+           <listitem>
+           <para><varname>AFTRSCRIPT</varname>: script file path
+             (default <filename>./aftr-script</filename>)</para>
+           </listitem>
+           <listitem>
+           <para><varname>AFTRDEVICE</varname>: name of the interface/device
+             (default <filename>tun0</filename>)</para>
+           </listitem>
+           <listitem>
+           <para><varname>AFTRPORT</varname>: port for TCP control channels
+             (default 1015)</para>
+           </listitem>
+           <listitem>
+           <para><varname>AFTRFACILITY</varname>: syslog facility
+             (default <constant>LOG_LOCAL5</constant>)</para>
+           </listitem>
+           <listitem>
+           <para><varname>AFTRLOGOPTION</varname>: openlog option
+             (default <constant>LOG_NDELAY</constant>)</para>
+           </listitem>
+           <listitem>
+           <para><varname>TRACE_NAT</varname>: enable tracing of NAT
+             entry creation/deletion (default is <constant>undef</constant>,
+             i.e., only tunnels and buckets are traced)</para>
+           </listitem>
+           <listitem>
+           <para><varname>NOPRIVACY</varname>: trace all addresses and ports
+             in NAT entry tracing (default is <constant>undef</constant>)
+           </para>
+           </listitem>
+           <listitem>
+           <para><varname>SIGNSHDR</varname>: define it to add a signature
+             header in structures (default is <constant>undef</constant>)
+           </para>
+           </listitem>
+           <listitem>
+           <para><varname>SIZES</varname>: define it to print sizes of
+             principal data structures (default is <constant>undef</constant>)
+           </para>
+           </listitem>
+           <listitem>
+           <para><varname>USE_TUN_PI</varname>: use the tun_pi struct in tun
+             interface/device I/O
+             (required on some platforms, including RedHat and CentOS v5,
+             for IPv6 support)</para>
+           </listitem>
+           <listitem>
+           <para><varname>notyet</varname>: some unfinished and arguable
+             features (<constant>undef</constant> of course)</para>
+           </listitem>
+         </itemizedlist>
+       </para>
+    </sect1>
+
+    <sect1>
+       <title>Command Line Options</title>
+       <para>
+         Included inline <refentrytitle>aftr</refentrytitle>
+         <manvolnum>8</manvolnum>
+       </para>
+       <xi:include href="aftr.docbook"/>
+    </sect1>
+
+    <sect1>
+       <title>Configuration File</title>
+       <para>
+         Included inline <refentrytitle>aftr-conf</refentrytitle>
+         <manvolnum>5</manvolnum>
+       </para>
+       <xi:include href="aftr.conf.docbook"/>
+    </sect1>
+
+    <sect1>
+       <title>Interactive Commands</title>
+       <para>
+         Included inline <refentrytitle>aftr-commands</refentrytitle>
+         <manvolnum>5</manvolnum>
+       </para>
+       <xi:include href="aftr.commands.docbook"/>
+    </sect1>
+
+    <sect1>
+       <title>Command Summary</title>
+       <para>
+       <table frame="all">
+       <tgroup cols="3" colsep="1" rowsep="1">
+       <colspec colname="name" align="left"/>
+       <colspec colname="section" align="center"/>
+       <colspec colname="syntax" align="left"/>
+       <thead>
+         <row>
+           <entry>Name</entry> <entry>Section</entry> <entry>Syntax</entry>
+         </row>
+       </thead>
+       <tbody>
+         <row>
+           <entry>abort</entry> <entry>interactive</entry> <entry></entry>
+         </row>
+         <row>
+           <entry>acl6</entry>  <entry>one or two</entry>
+           <entry>
+             <replaceable>IPv6</replaceable>/<replaceable>prefix_length</replaceable>
+           </entry>
+         </row>
+         <row>
+           <entry>address</entry> <entry>one</entry>
+           <entry>endpoint <replaceable>IPv6</replaceable>|icmp <replaceable>IPv4</replaceable>
+           </entry>
+         </row>
+         <row>
+           <entry>autotunnel</entry> <entry>zero</entry> <entry>on|off</entry>
+         </row>
+         <row>
+           <entry>bucket</entry> <entry>zero</entry>
+           <entry>tcp|udp|icmp size <replaceable>size</replaceable></entry>
+         </row>
+         <row>
+           <entry>debug</entry> <entry>&gt;= two</entry>
+           <entry>set|enable|...|tunnel</entry>
+         </row>
+         <row>
+           <entry>decay</entry> <entry>zero</entry>
+           <entry>1|5|15 <replaceable>decay</replaceable></entry>
+         </row>
+         <row>
+           <entry>default</entry> <entry>zero</entry>
+           <entry>fragment|hold|...|tunnel</entry>
+         </row>
+         <row>
+           <entry>defmss</entry> <entry>zero</entry> <entry>on|off</entry>
+         </row>
+         <row>
+           <entry>defmtu</entry> <entry>zero</entry>
+           <entry><replaceable>mtu</replaceable></entry>
+         </row>
+         <row>
+           <entry>deftoobig</entry> <entry>zero</entry>
+           <entry>on|off|strict</entry>
+         </row>
+         <row>
+           <entry>delete</entry> <entry>== add</entry>
+           <entry>acl6|nat|nonat|private|prr|tunnel</entry>
+         </row>
+         <row>
+           <entry>echo</entry> <entry>interactive</entry> <entry><replaceable>xxx</replaceable></entry>
+         </row>
+         <row>
+           <entry>eqfrag</entry> <entry>zero</entry> <entry>on|off</entry>
+         </row>
+         <row>
+           <entry>fork</entry> <entry>interactive</entry> <entry></entry>
+         </row>
+         <row>
+           <entry>help</entry> <entry>interactive</entry>
+           <entry><optional>all</optional></entry>
+         </row>
+         <row>
+           <entry>kill</entry> <entry>interactive</entry> <entry></entry>
+         </row>
+         <row>
+           <entry>list</entry> <entry>interactive</entry>
+           <entry>nat|nonat|pool|tunnel</entry>
+         </row>
+         <row>
+           <entry>load</entry> <entry>interactive</entry>
+           <entry><replaceable>file</replaceable></entry>
+         </row>
+         <row>
+           <entry>mss</entry> <entry>&gt;= two</entry>
+           <entry><replaceable>IPv6</replaceable> on|off</entry>
+         </row>
+         <row>
+           <entry>mtu</entry> <entry>&gt;= two</entry>
+           <entry><replaceable>IPv6</replaceable> <replaceable>mtu</replaceable></entry>
+         </row>
+         <row>
+           <entry>nat</entry> <entry>two</entry>
+           <entry><replaceable>IPv6</replaceable> tcp|udp <replaceable>IPv4_src</replaceable> ...</entry>
+         </row>
+         <row>
+           <entry>nonat</entry> <entry>two</entry>
+           <entry><replaceable>IPv6</replaceable> <replaceable>IPv4</replaceable>/<replaceable>prefix_length</replaceable></entry>
+         </row>
+         <row>
+           <entry>noop</entry> <entry>interactive</entry> <entry></entry>
+         </row>
+         <row>
+           <entry>pool</entry> <entry>one</entry>
+           <entry><replaceable>IPv4</replaceable> [tcp|udp|echo <replaceable>min</replaceable>-<replaceable>max</replaceable>]</entry>
+         </row>
+         <row>
+           <entry>private</entry> <entry>zero</entry>
+           <entry>
+             <replaceable>IPv4</replaceable>/<replaceable>prefix_length</replaceable>
+           </entry>
+         </row>
+         <row>
+           <entry>prr</entry> <entry>two</entry>
+           <entry><replaceable>IPv6</replaceable> tcp|udp <replaceable>IPv4</replaceable> <replaceable>port</replaceable></entry>
+         </row>
+         <row>
+           <entry>quantum</entry> <entry>zero</entry>
+           <entry><replaceable>quantum</replaceable></entry>
+         </row>
+         <row>
+           <entry>reboot</entry> <entry>interactive</entry> <entry></entry>
+         </row>
+         <row>
+           <entry>reload</entry> <entry>interactive</entry> <entry></entry>
+         </row>
+         <row>
+           <entry>session</entry> <entry>interactive</entry>
+           <entry>close|config|log|name|notify</entry>
+         </row>
+         <row>
+           <entry>show</entry> <entry>interactive</entry>
+           <entry>dropped|stat</entry>
+         </row>
+         <row>
+           <entry>toobig</entry> <entry>&gt;= two</entry>
+           <entry><replaceable>IPv6</replaceable> on|off|strict</entry>
+         </row>
+         <row>
+           <entry>try</entry> <entry>two</entry>
+           <entry>tunnel ... | nat <replaceable>IPv6</replaceable> tcp|udp <replaceable>IPv4_src</replaceable> ...</entry>
+         </row>
+         <row>
+           <entry>tunnel</entry> <entry>two</entry>
+           <entry><replaceable>IPv6</replaceable> [<replaceable>IPv4</replaceable>]</entry>
+         </row>
+       </tbody>
+       <tfoot>
+       </tfoot>
+       </tgroup>
+       </table>
+       </para>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>Managing AFTR</title>
+    <sect1>
+      <title>Syslog</title>
+      <para>
+	Errors, debug messages, traces, etc, are logged through syslog
+	with <symbol>aftr</symbol> as the program name.
+      </para>
+      <para>
+	The default facility is <constant>LOG_LOCAL5</constant> (can be
+	changed at compile time by  setting <varname>AFTRFACILITY</varname>),
+	the default <function>openlog()</function> option is
+	<constant>LOG_NDELAY</constant> (can be changed at compile time by
+	setting <varname>AFTRLOGOPTION</varname>, for instance to add 
+	<constant>LOG_PID</constant>). Levels are:
+	<itemizedlist>
+          <listitem>
+            <para>critical errors (i.e., the process must be rebooted)
+              to <constant>LOG_CRIT</constant></para>
+          </listitem>
+          <listitem>
+            <para>error conditions (i.e., bad packets, not critical
+              memory allocation failures, bad commands, etc) to
+              <constant>LOG_ERR</constant></para>
+          </listitem>
+          <listitem>
+            <para>warnings to <constant>LOG_WARNING</constant></para>
+          </listitem>
+          <listitem>
+            <para>informational messages (including I/O logs) to
+              <constant>LOG_INFO</constant></para>
+          </listitem>
+          <listitem>
+            <para>debug messages (cf. debug set xxx) to
+              <constant>LOG_DEBUG</constant></para>
+          </listitem>
+          <listitem>
+            <para>trace messages (see next section) to
+              <constant>LOG_NOTICE</constant></para>
+          </listitem>
+	</itemizedlist>
+      </para>
+
+      <sect2>
+	<title>Trace Logging</title>
+	<para>
+          Trace messages are:
+          <itemizedlist>
+            <listitem>
+              <para>
+		tunnel add|del <replaceable>client_IPv6</replaceable>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+		<replaceable>seconds</replaceable> bucket
+		<replaceable>client_IPv6</replaceable>
+		<replaceable>natted_IPv4</replaceable> tcp|udp
+		<optional>#<replaceable>port</replaceable></optional>+
+              </para>
+            </listitem>
+          </itemizedlist>
+	</para>
+	<para>
+          If TRACE_NAT was defined at compile time (default is undefined):
+	</para>
+	<para>
+          if NOPRIVACY is kept undefined:
+          <itemizedlist>
+            <listitem>
+              <para>
+		<replaceable>seconds</replaceable> nat add|del
+		<replaceable>client_IPv6</replaceable> tcp|udp
+		<replaceable>natted_IPv4</replaceable>
+		<replaceable>port</replaceable>
+              </para>
+            </listitem>
+          </itemizedlist>
+	</para>
+	<para>
+          if NOPRIVACY is defined:
+          <itemizedlist>
+            <listitem>
+              <para>
+		<replaceable>seconds</replaceable> nat add|del
+		<replaceable>client_IPv6</replaceable> tcp|udp
+		<replaceable>client_IPv4</replaceable>
+		<replaceable>client_port</replaceable>
+		<replaceable>natted_IPv4</replaceable>
+		<replaceable>natted_port</replaceable>
+		<replaceable>destination_IPv4</replaceable>
+		<replaceable>destination_port</replaceable>
+              </para>
+            </listitem>
+          </itemizedlist>
+	</para>
+      </sect2>
+    </sect1>
+
+    <sect1>
+       <title>Security</title>
+       <para>
+       The <command>aftr</command> process needs the root privilege to
+       open the tunnel interface/device.  The TCP over IPv4/IPv6
+       control channels are bound to localhost so are limited to the
+       local node. There are many tools which provide a secure
+       connection forwarding, for instance <command>ssh -L</command>.
+       The PF_UNIX control channel relies on standard file system
+       permissions (cf. <command>umask</command>), it should be used
+       for finer control than node access.
+       </para>
+       <para>
+       The source address of encapsulated IPv4 in IPv6 packets must be
+       a private address. The list of IPv4 private prefixes is
+       initialized to RFC 1918 prefixes and the unpublished I-D, it is
+       manageable by zone zero commands. IPv6 ACLs filter incoming
+       IPv6 packets.
+       </para>
+       <para>
+       The <command>try</command> commands are protected against not
+       authorized tunnel creation, i.e., both IPv6 and IPv4 ACLs are
+       applied to try command arguments.
+       </para>
+    </sect1>
+
+    <sect1>
+       <title>Debug primer</title>
+       <para>
+       Unlimit the core dump size if you'd like to get core file on
+       crashes or with the abort command. On Linux twist the core
+       naming to something better than <filename>core</filename>
+       (cf. <refentrytitle>core</refentrytitle><manvolnum>5</manvolnum>).
+       Please keep the binary associated to core files. As
+       the <command>fork</command> command is fun but eats memory put
+       enough memory in the aftr box...
+       </para>
+       <para>
+         When the <command>aftr</command> process is not (yet) crashed
+         but seems no longer to forward packets:
+         <itemizedlist>
+           <listitem>
+           <para>go to an open session (try to keep on in case the
+             alternative fails) or if none open a new one</para>
+           </listitem>
+           <listitem>
+           <para>check if it is responsive using the <command>noop</command>
+             (answer <computeroutput>LOG: alive</computeroutput>), if not
+             try to get a core file (attach in gdb and use
+             <command>gcore</command>), kill it
+             (another way to get a core file with <command>^\</command> /
+             <command>kill</command>)
+             and relaunch it</para>
+           </listitem>
+           <listitem>
+           <para>if not in a hurry try to understand the issue with
+             <command>show stat</command> and <command>show dropped</command>
+             </para>
+           </listitem>
+           <listitem>
+           <para>open a second session, send <command>fork</command> to get
+             a child process where you can use extensive debug, including gdb,
+             on it. If you don't know or you can't understand,
+             <command>abort</command> the child process to get a core file.
+             </para>
+           </listitem>
+           <listitem>
+           <para>update the config file if needed, reboot the parent/main
+             process (it will lose all the state and restart from the
+             beginning)</para>
+           </listitem>
+         </itemizedlist>
+        </para>
+        <para>
+          Summary for the busy operator:
+          <itemizedlist>
+            <listitem>
+            <para><command>noop</command> -&gt; nothing: go to the
+            shell to kill and relaunch it
+            </para>
+            </listitem>
+            <listitem>
+            <para><command>noop</command> -&gt; expected message: open
+              another session, send <command>fork</command>, wait for
+              the child pid message, send <command>abort</command> on
+              this new session. On the previous session (where you
+              sent
+              <command>noop</command>), send <command>reboot</command>
+            </para>
+            </listitem>
+          </itemizedlist>
+       </para>
+    </sect1>
+
+  </chapter>
+
+  <chapter>
+    <title>XML Interface</title>
+    <para>
+      The "XML interface" is a way for service providers to
+      programmatically manage static port mappings on behalf of
+      their customers.
+    </para>
+    <para>
+      For instance, the service provider might have a web portal,
+      tied into the provisioning system, through which a customer
+      could request a small number of static port mappings.  The
+      provisioning system would send an XML-encoded request to the
+      AFTR that is serving that customer, and the AFTR would send
+      back an XML-encoded reply.
+    </para>
+    <para>
+      The <filename>xml</filename> subdirectory contains a
+      specification for the remote configuration protocol, together
+      with a server that runs on the AFTR box, and an example client
+      that runs on the provisioning system.
+    </para>
+
+    <sect1>
+      <title>Transport</title>
+      <para>
+	The server and client communicate over either HTTP or a
+	plain TCP socket.  By default, they use HTTP.  To change to
+	TCP socket, you must edit both <filename>xmlconf.py</filename> and
+	<filename>xmlclient.py</filename>, commenting out the
+	line <userinput>TRANSPORT = 'http'</userinput>, and
+	uncommenting the line <userinput>TRANSPORT = 'socket'</userinput>.
+      </para>
+    </sect1>
+
+    <sect1>
+      <title>Remote Configuration Daemon</title>
+      <para>
+        Included inline <refentrytitle>xmlconf</refentrytitle>
+        <manvolnum>8</manvolnum>
+      </para>
+      <xi:include href="xmlconf.docbook"/>
+    </sect1>
+
+    <sect1>
+      <title>Remote Configuration Client</title>
+      <para>
+        Included inline <refentrytitle>xmlclient</refentrytitle>
+        <manvolnum>8</manvolnum>
+      </para>
+      <xi:include href="xmlclient.docbook"/>
+    </sect1>
+  </chapter>
+
+  <chapter>
+    <title>Advanced Topics</title>
+    <sect1>
+      <title>No-Nat/Pass-Through</title>
+      <para>
+	In a world where IPv4 address sharing is the norm, one might
+	imagine that some customers would be willing to pay a little
+	more for a full, non-shared global IPv4 prefix or address
+        (i.e., a /32 prefix).
+      </para>
+      <para>
+	In this case, the customer would perform the NAT function in
+	his own CPE, but he would still have to tunnel IPv4 traffic
+	through the provider's IPv6-only network to the AFTR.
+      </para>
+      <para>
+	As yet, there is no defined signalling for the client to
+	request a non-shared IPv4 prefix, or for the server to
+	establish a non-natted tunnel.  All configuration must be done
+	manually, on both the B4 and the AFTR.
+      </para>
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    On the B4, the tunnel will still have to be set up, and
+	    all IPv4 traffic will have to be routed to the tunnel, but
+	    only after the local NAT function is performed.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    On the AFTR, a <command>nonat</command> command will have
+	    to be entered in <filename>aftr.conf</filename>, and a
+	    route to the customer's IPv4 prefix will have to be
+	    created in
+	    <filename>aftr-script</filename>.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </sect1>
+
+    <sect1>
+      <title>A+P/Port-Range Routing</title>
+      <para>
+	A+P is a different approach to IPv4 address sharing, described
+	in <filename>draft-ymbk-aplusp-05.txt</filename>.  In this
+	scenario, each customer is provisioned with a global IPv4
+	address, but only a restricted range of ports he can use
+	within that address.
+      </para>
+      <para>
+	Similar to the no-nat case above, the customer would perform
+	the NAT function within his own CPE (ensuring that all port
+	mappings are within the provisioned range), but he would still
+	have to tunnel IPv4 traffic through the provider's IPv6-only
+	network to the AFTR.
+      </para>
+      <para>
+	As yet, there is no defined signalling for the client to
+	request an A+P assignment, or for the server to
+	establish a non-natted tunnel.  All configuration must be done
+	manually, on both the B4 and the AFTR.
+      </para>
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    On the B4, the tunnel will still have to be set up, and
+	    all IPv4 traffic will have to be routed to the tunnel, but
+	    only after the local NAT function is performed.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    On the AFTR, a <command>prr</command> command will have to
+	    be entered in <filename>aftr.conf</filename>, and a route
+	    to the customer's IPv4 address will have to be created in
+	    <filename>aftr-script</filename>.
+	  </para>
+	</listitem>
+      </itemizedlist>
+    </sect1>
+
+    <sect1>
+      <title>Sharing a Single Address</title>
+      <para>
+	In production use, an AFTR will have a pool of global IPv4
+	addresses that are used exclusively for natted port mappings.
+      </para>
+      <para>
+	However, for testing or demonstration purposes, you may want
+	to deploy AFTR on a box with only one IPv4 address:
+      </para>
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    This address is used for standard services of the box.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    This address is used by application proxies etc., in
+	    particular the DNS caching server.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    This address is used to NAT traffic, i.e., for the AFTR
+	    function.
+	  </para>
+	</listitem>
+      </itemizedlist>
+      <para>
+	The address can be dynamic (provisioned by DHCP), but must not
+	change during an AFTR process run.
+      </para>
+      <para>
+	The AFTR box is configured to use the eth0 interface on the
+	WAN side, the eth1 on the LAN side. The AFTR process itself is
+	configured as usual, but it uses a pseudo-public address
+	(i.e., an address which is not recognized as private but in
+	fact is a reserved public address, the first to avoid
+	confusion, the second to avoid a collision with a real public
+	address).
+      </para>
+      <para>
+	Netfilter/iptables is used to map the pseudo-public address to
+	the real public address. Port forwarding is a bit more
+	complex, as the port range used for port forwarding must be
+	port-forwarded (destination natted in netfilter/iptables
+	terms) as-is (i.e., not changing ports) to the pseudo-public
+	address.  Of course there is nothing which can be done for
+	no-NATs or for A+P/PRR as the first router/NAT of the Internet
+	connection has no reason to support it.
+      </para>
+      <para>
+	Note that this creates a double-NAT situation within the AFTR
+	box: customer traffic is natted once in the AFTR itself, to
+	the pseudo-public address, then a second time in netfilter, to
+	the real public address.  This is obviously not ideal from a
+	performance perspective, but this scenario is only for testing
+	and demonstration purposes.
+      </para>
+      <para>
+	For the AFTR box itself configuration should be:
+      </para>
+      <itemizedlist>
+	<listitem>
+	  <para>
+	    Use the standard setup for eth0 (i.e., plain DHCP).
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Use the standard setup for the AFTR function, only the
+	    script needs to be special.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    IPv4 forwarding must be enabled.
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Don't forget to flush iptables and ip6tables.
+	  </para>
+	</listitem>
+      </itemizedlist>
+      <para>
+	Use or adapt the example <filename>aftr.conf</filename> and
+	<filename>aftr-script</filename> files from the 
+	<filename>conf/shareone</filename> directory.  (They use
+	198.18.200.111 as the pseudo-public address and 5000-59999 TCP
+	and UDP port ranges for dynamic NAT bindings.)
+      </para>
+      <para>
+	If the kernel supports it (see <command>iptables</command>
+	SNAT section) it can be useful to add
+	<userinput>--random</userinput> to the SNAT rule in order to
+	get back port randomization.
+      </para>
+      <sect2>
+	<title>For netfilter/iptables Wizards</title>
+	<itemizedlist>
+	  <listitem>
+	    <para>
+	      <userinput>$PUBLIC</userinput> is the shared real public
+	      address, it is taken from the eth0 configuration.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      The flush in <function>stop</function> and at the
+	      beginning of <function>start</function> is for cleaning
+	      NAT rules.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      The SNAT rule just creates a new conntrack NAT entry for
+	      the first packet of a flow to the Internet coming from the
+	      AFTR. It adds no constraint on the protocol or the natted
+	      source port (but the AFTR has itself such constraints,
+	      protocols are tcp/udp/icmp-echo and the source port will
+	      be in the range declared in the pool so the natted port
+	      should be in one of the ranges decribed in
+	      <command>iptables</command> SNAT section).
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      The first DNAT rule remaps traffic to a matching port to
+	      the pseudo public address without changing the destination
+	      port. It is used for port forwarding.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Destination ports are protocol specific so the rules have
+	      to be duplicated from TCP to UDP.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Locally generated traffic doesn't go through PREROUTING,
+	      so the rules have to be duplicated from PREROUTING to
+	      OUTPUT.
+	    </para>
+	  </listitem>
+	</itemizedlist>
+	<para>
+	  Don't forget that with conntrack a NAT entry matches the both
+	  ways, so what matters is the processing of the first packet of
+	  a flow. Further packets are recognized by conntrack to belong
+	  to the same flow, including in the "reverse" way, and the NAT
+	  rule is applied (the symmetrical rule for reverse way
+	  packets). And conntrack is also used to recognize local
+	  traffic.
+	</para>
+      </sect2>
+    </sect1>
+  </chapter>
+
+  <appendix>
+    <title>Mailing Lists</title>
+    <para>
+      Bug reports should be sent to: <email>aftr-bugs@isc.org</email>
+    </para>
+    <para>
+      General questions or feedback (e.g., about configuration,
+      operation, or use cases) should be sent to:
+      <email>aftr-users@isc.org</email>
+    </para>
+  </appendix>
+
+  </book>

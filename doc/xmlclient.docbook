@@ -1,0 +1,221 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+              "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+              [<!ENTITY mdash "&#8212;">]>
+<!--
+ - Copyright (C) 2010  Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<!-- File:  $Id: aftr.docbook 883 2010-10-05 21:03:22Z pselkirk $ -->
+<refentry>
+  <refentryinfo>
+     <date>October 10, 2010</date>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle><application>xmlclient.py</application></refentrytitle>
+    <manvolnum>8</manvolnum>
+    <refmiscinfo>AFTR</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname><application>xmlclient.py</application></refname>
+    <refpurpose>remote configuration client for aftr</refpurpose>
+  </refnamediv>
+
+  <docinfo>
+    <copyright>
+      <year>2010</year>
+      <holder>Internet Systems Consortium, Inc. ("ISC")</holder>
+    </copyright>
+  </docinfo>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>xmlclient.py</command>
+      <arg choice='plain'><replaceable class="parameter">aftr-addr</replaceable></arg>
+      <arg><replaceable class="parameter">command</replaceable></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>OPTIONS</title>
+    <variablelist>
+      <varlistentry>
+        <term>aftr-addr</term>
+        <listitem>
+          <para>
+	    This is the address (IPv4 or IPv6) the the target AFTR.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term>create 
+	  <replaceable class="parameter">user-ipv6</replaceable>
+	  <replaceable class="parameter">protocol</replaceable>
+	  <replaceable class="parameter">src-ipv4</replaceable>
+	  <replaceable class="parameter">src-port</replaceable>
+	  <replaceable class="parameter">nat-ipv4</replaceable>
+	  <replaceable class="parameter">nat-port</replaceable>
+	</term>
+        <listitem>
+          <para>
+	    This requests the aftr to create a port mapping.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>create 
+	  <replaceable class="parameter">user-ipv6</replaceable>
+	  <replaceable class="parameter">nat-ipv4</replaceable>
+	</term>
+        <listitem>
+          <para>
+	    This requests the aftr to create a tunnel entry,
+	    using <replaceable>nat-ipv4</replaceable> as the natted
+	    IPv4 address for all future port mappings on this tunnel
+	    (dynamic as well as static).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>delete
+	  <replaceable class="parameter">user-ipv6</replaceable>
+	  <replaceable class="parameter">protocol</replaceable>
+	  <replaceable class="parameter">src-ipv4</replaceable>
+	  <replaceable class="parameter">src-port</replaceable>
+	  <replaceable class="parameter">nat-ipv4</replaceable>
+	  <replaceable class="parameter">nat-port</replaceable>
+	</term>
+      </varlistentry>
+      <varlistentry>
+        <term>delete
+	  <replaceable class="parameter">user-ipv6</replaceable>
+	  <replaceable class="parameter">protocol</replaceable>
+	  <replaceable class="parameter">src-ipv4</replaceable>
+	  <replaceable class="parameter">src-port</replaceable>
+	</term>
+      </varlistentry>
+      <varlistentry>
+        <term>delete
+	  <replaceable class="parameter">protocol</replaceable>
+	  <replaceable class="parameter">nat-ipv4</replaceable>
+	  <replaceable class="parameter">nat-port</replaceable>
+	</term>
+        <listitem>
+          <para>
+	    These three forms of the <userinput>delete</userinput>
+	    command all request the aftr to delete a port mapping.
+	    The mapping can be fully specified (first form), but a
+	    mapping can also be uniquely identifed by either internal
+	    parameters (second form) or external parameters (third
+	    form).
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+        <term>delete
+	  <replaceable class="parameter">user-ipv6</replaceable>
+	</term>
+        <listitem>
+          <para>
+	    This requests the aftr to delete all port mappings
+	    (dynamic as well as static) and other state associated
+	    with the given tunnel address.  This is often done prior
+	    to moving the customer to a new natted IPv4 address.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>flush</term>
+        <listitem>
+          <para>
+	    This requests the aftr to remove all static port mappings
+	    and configured tunnel entries.  Note that this is a very
+	    drastic action, and should only be undertaken if (for
+	    example) the aftr configuration is seriously out of sync
+	    with the provisioning system.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>get <replaceable class="parameter">user-ipv6</replaceable></term>
+        <listitem>
+          <para>
+	    This requests the aftr to report all static port mappings
+	    associated with the given tunnel address.
+          </para>
+        </listitem>
+      </varlistentry>
+      <varlistentry>
+	<term>get</term>
+        <listitem>
+          <para>
+	    This requests the aftr to report all static port mappings,
+	    and all configured tunnels without static port mappings.
+          </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>SCRIPTING</title>
+    <para>
+      If no commands are given on the command line,
+      <command>xmlclient.py</command> will read commands from
+      stdin.  This allows the provisioning system to accumulate
+      changes for a given AFTR, and send them all at once.
+    </para>
+    <para>
+      In general, it is probably easier for the provisioning system to
+      send requests immediately, and get replies immediately.
+      However, some operators may prefer to batch up requests, and
+      this method sends multiple requests over an open connection,
+      without having to establish a connection for each request.
+    </para>
+    <para>
+      Example:<sbr/>
+      <userinput>xmlclient.py 2001::500 &lt;script</userinput>
+    </para>
+    <para>
+      where <filename>script</filename> contains:<sbr/>
+      <userinput>create 2001::525a:8c5a:30d4:e36e tcp 192.168.0.88 6265 198.18.200.174 5005</userinput><sbr/>
+      <userinput>create 2001::835c:1eff:8d66:22fc tcp 192.168.1.138 3877 198.18.200.121 5572</userinput><sbr/>
+      <userinput>create 2001::e3:9a2f:8abf:40de:2d87 udp 192.168.0.92 7356 198.18.200.149 5547</userinput><sbr/>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+    <citerefentry>
+      <refentrytitle>xmlconf</refentrytitle>
+      <manvolnum>8</manvolnum>
+    </citerefentry>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+    <para><corpauthor>Internet Systems Consortium</corpauthor></para>
+  </refsect1>
+
+</refentry>

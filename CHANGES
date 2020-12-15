@@ -1,0 +1,309 @@
+	--- aftr-1.1rc1 released ---
+
+ 119.	[bug]		Update/fix xpmpd.py. [RT #22370]
+
+	--- aftr-1.1b2 released ---
+
+ 118.	[doc]		Updated documentation, added book.txt,
+			streamlined example config files.
+
+ 117.	[func]		Major improvements to the XML tools.
+
+ 116.	[bug]		Protect nonat entries against tunnel operations,
+			and add nonat ICMP translation. [RT #22330]
+
+ 115.	[bug]		Set the correct next-header value after IPv6
+			reassembly. [RT #22238]
+
+ 114.	[bug]		Use UDP=1/TCP=2 in UPnP IWF. [RT #22100]
+
+ 113.	[func]		Add 'reload succeeded' message. [RT #21596]
+
+ 112.	[bug]		Protect the range loop against clock jumping
+			backward.
+
+	--- aftr-1.1b1 released ---
+
+ 111.	[func]		Add XML-based remote configuration tools. [RT #20379]
+
+ 110.	[func]		Don't list stale entries in 'list nat global'.
+			[RT #21630]
+
+ 109.	[bug]		Per session command buffer. [RT #21599]
+
+ 108.	[func]		Extend the try tunnel command. [RT #21566]
+
+ 107.	[func]		Merge UPNP IGD proxy. [RT #21184]
+
+ 106.	[func]		Add a search in logs/traces tool. [RT #21185]
+
+	--- aftr-1.0.1 released ---
+
+ 105.   [func]		Silence spurious gcc warnings.
+
+ 104.	[doc]		Slightly improve the documentation. [RT #20906]
+
+	--- aftr-1.0 released ---
+
+ 103.	[doc]		Give configuration examples for an AFTR which
+			shares one public address for everything
+			(confs/*shareone* files). [RT #20770]
+
+ 102.	[func]		Add acl4/private default. [RT #20726]
+
+ 101.	[bug]		Check the IPv4 source address of packets from a
+			no-nat B4. [RT #20684]
+
+ 100.	[func]		Shorter (1ms vs 1s)  main loop select() timeout
+			when some housekeeping has to be done. [RT #20684]
+
+  99.	[doc]		Document ACL processing. [RT #20684]
+
+  98.	[doc]		Add a README in confs listing the files. [RT #20684]
+
+  97.	[func]		Add 'default private' command and improve acl6
+			command. [RT #20684]
+
+  96.	[doc]		Documentation reorganization: source in doc,
+			manuals in man, HTML in html. [RT #20684]
+
+	--- aftr-1.0b1 released ---
+
+  95.	[func]		Add support for extended NAT-PMP. [RT #20377]
+
+  94.	[func]		Add an echo command. [RT #20653]
+
+  93.	[bug]		Protect against unexpected 'session close'.
+			[RT #20636]
+
+  92.	[func]		Add a try command and notification of tunnel removal
+			for NAT-PMP/UPnP IGD daemon benefit. [RT #20631]
+
+  91.	[doc]		Create reference and manuals in docbook. [RT #20483]
+
+  90.	[func]		Rename cgn* to aftr*. [RT #20348]
+
+  89.	[func]		Promote a lot of compile time options to
+			section zero defaults. [RT #19993]
+
+  88.	[func]		Add check, fork and abort commands. Add
+			compile time SIGNSHDR option for a
+			signature header in structures.
+			Fix a lot of bugs... [RT #20537]
+
+  87.	[func]		Implement the reload command. [RT #20275]
+
+  86.	[func]		Add an atomic load file command (it is a
+			form of input redirection). [RT #20539]
+
+  85.	[func]		Add debug/list/... help sub-commands. [RT #20543]
+
+  84.	[func]		Add control channel (aka. session) context
+			(with some commands renaming). [RT #20481]
+
+  83.	[func]		Add some command line options. [RT #20536]
+
+  82.	[doc]		Add a section about syslog in README. [RT #20528]
+
+  81.	[bug]		Eats extra spaces in command/config using
+			strtok_r(). [RT #20529]
+
+  80.	[func]		Add a PF_UNIX control channel. [RT #20530]
+
+  79.	[bug]		Add srcidx in list tunnel. [RT #20471]
+
+  78.	[func]		Add a check for dynamic/static conflicts
+			(i.e., a static NAT entry configured in
+			a dynamic port range). [RT #20468]
+
+  77.	[func]		Add -c for alternate config. [RT #20376]
+
+  76.	[func]		Merge start/stop scripts. [RT #20427]
+
+  75.	[func]		Add control channels. [RT #20276]
+
+  74.	[func]		Split config commands into sections. [RT #20271]
+
+  73.	[func]		Deal with up to QUANTUM packets in main loop
+			before housekeeping. [RT #20373]
+
+  72.	[func]		Recode list operations with macros. [RT #20347]
+
+  71.	[func]		Check for counters which go under zero. [RT #20349]
+
+  70.	[func]		Add the reboot command. [RT #20273]
+
+  69.	[func]		Use syslog for logxxx(), including tracing
+			(so the trace command was removed). [RT #20272]
+
+  68.	[func]		Rename address and port commands. [RT #19994]
+
+  67.	[func]		Switch to pure allocation buckets. [RT #20345]
+
+  66.	[bug]		Release bucket when new_nat() fails. [RT #20199]
+
+  65.	[func]		Add BUCKET_DEBUG compile flag which enables
+			"debug bucket all".
+
+  64.	[func]		Make LIFETIMEs compile time tunables.
+
+  63.	[func]		Add TRACE_NAT compile flag (default is undef).
+
+  62.	[bug]		Prompt not-yet empty bucket.
+
+  61.	[func]		Add an option IPv4 source address in tunnel command
+			[RT #19992].
+
+  60.	[func]		Add NAT creation rate limit (per tunnel/protocol).
+			Not yet tested.
+
+  59.	[func]		TCP ALG is finished.
+
+        --- cgn-usermode-snapshot-20090709 released ---
+
+  58.	[doc]		Warn about the "deny all" of IPv6 ACL.
+
+  57.	[bug]		Another fix in splay tree code for wilcards.
+			FTP ALG works if there is no retransmissions.
+
+  56.	[bug]		Begin to fix the FTP ALG (not finished).
+
+  55.	[bug]		Fix a typo in the splay tree integration.
+			src1<->cgn tests run again.
+
+  54.	[bug]		The 192.0.0.0 prefix is a /29.
+
+  53.	[func]		First version of FTP ALG.
+
+  52.	[func]		Implement No-NAT.
+
+  51.	[func]		Add TCP MSS patching for PRR (aka A+P).
+
+  50.	[bug]		Fix two bucket bugs.
+
+  49.	[func]		Add IPv6 ACL.
+
+  48.	[bug]		Fix crash on some truncated commands.
+
+  47.	[func]		Add "debug bucket <addr>" command.
+
+  46.	[bug]		Fix ICMP echo translation.
+
+  45.	[func]		Add port ranges and buckets.
+
+  44.	[func]		Add show [dropped|stat] aliases.
+
+  43.	[func]		Add dropped counters (and "debug dropped" command).
+
+  42.	[func]		Add NAT entry counters & co.
+
+  41.	[func]		Add NAT entry creation/deletion counters and rates.
+
+  40.	[func]		Add per tunnel max fragment list length and
+			defrag*() counters.
+
+  39.	[func]		Remove port affinity.
+
+  38.	[func]		Make MAXNATCNT visible.
+
+  37.	[func]		Add rates (with 1/5/15 mn decays).
+
+  36.	[func]		Add 192.0.0.0/24 from the unpublished I-D.
+
+  35.	[func]		Implement per-tunnel debug counters.
+
+  34.	[func]		Split IPv4 fragment lists into in and out.
+			Make fragment list max lengths compile flags.
+
+  33.	[func]		Restrict for privacy NAT tracing.
+
+        --- cgn-usermode-snapshot-20090626 released ---
+
+  32.	[func]		Add a quit command.
+
+  31.	[func]		Merge splay branch after profiling results.
+
+  30.	[bug]		Keep some perhaps superfluous sanity checks
+			and remove select EINTR messages.
+
+        --- cgn-usermode-snapshot-20090610 released ---
+
+  29.	[func]		Add more logging, especially for packet drops.
+
+  28.	[bug]		Fix the address used for ICMPv4 errors.
+
+  27.	[doc]		Reorganize code.
+
+  26.	[func]		Overhaul the command dispatcher, add context-
+			sensitive help.
+
+  25.	[func]		Change all fprintf(stderr, ...) to log[err|info]().
+
+  24.	[func]		Add too big policy (note previous policy was strict).
+
+  23.	[doc]		Add control flow description.
+
+  22.	[func]		Add a lot of logging, including I/O timestamps
+  			with the "tcpdump -tt" format.
+
+  21.	[bug]		Cleanup tunnel tree remove routine.
+
+  20.	[bug]		Fix some bugs from 19.
+
+        --- cgn-usermode-snapshot-20090521 released ---
+
+  19.	[func]		Changed all user commands taking tunnel index
+			to use client IPv6 address instead.
+
+	--- cgn-usermode-snapshot-20090513 released ---
+
+  18.	[doc]		Updated README with run-time commands.
+
+  17.	[bug]		Fix spurious overruns in TCP MSS patching.
+
+  16.	[func]		Add comments (leading '#') and noop commands.
+
+  15.	[dev]		Create a variant cgn+splay.c from cgn.c v124.
+
+	--- cgn-usermode-snapshot-20090421 released ---
+
+  14.	[func]		Detect closing/resetting TCP connections to
+  			shorter NAT entries timeouts.
+
+  13.	[bug]		Bump MAXNATCNT for the infamous
+  			http://jean.h2tp.com/Photoweb/index2.php site.
+
+  12.	[doc]		Renumber examples to put RFC 1918 networks
+  			only at the customers' side.
+
+  11.	[func]		Add tracing of state transitions.
+
+  10.	[bug]		Possible issue with tunnel deletion.
+
+   9.	[func]		Add delete commands.
+
+   8.	[func]		Add the list commands using the configuration
+   			file format (i.e., to extract and copy the
+			dynamic part of the running configuration).
+
+   7.	[func]		Add extended debug commands.
+
+   6.	[func]		Add support for A+P/PRR null NAT entries.
+
+   5.	[func]		Add command line.   
+
+	--- cgn-usermode-snapshot-20090311 released ---
+
+   4.	[func]		Global default of MSS patching and tunnel MTU
+			specification can now be specified at run-time.
+			See 'defmtu' and 'mss <on/off>' options of README.
+
+   3.	[func]		Equalizing fragment length is now run-time option:
+   			Specify 'eqfrag on' in the configuration file.
+
+   2.	[bug]		Fixed stack variable overflow.
+
+   1.	[func]		Supported dynamic tunnel (IPv4/IPv6 encapsulation)
+   			mode.
+
+	--- cgn-usermode-snapshot-20090204 released ---

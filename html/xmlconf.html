@@ -1,0 +1,86 @@
+<!--
+ - Copyright (C) 2010 Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+<!-- $Id$ -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>xmlconf.py</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="xmlconf.py">
+<a name="id3002725"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>Name</h2>
+<p><span class="application">xmlconf.py</span> &#8212; remote configuration daemon for aftr</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">xmlconf.py</code>  [<code class="option">-l <em class="replaceable"><code>listening-addr</code></em></code>] [<code class="option">-p <em class="replaceable"><code>listening-port</code></em></code>] [<code class="option">-r <em class="replaceable"><code>remote-addr</code></em></code>] [<code class="option">-c <em class="replaceable"><code>config-file</code></em></code>] [<code class="option">-v</code>]</p></div>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="id3003220"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term">-l <em class="replaceable"><code>listening-addr</code></em></span></dt>
+<dd><p>
+	    This specifies a local address on which to listen.  If not
+	    specified, it listens on all local addresses.
+          </p></dd>
+<dt><span class="term">-p <em class="replaceable"><code>listening-port</code></em></span></dt>
+<dd><p>
+	    This specifies a local port on which to listen.  Defaults
+	    to port 4148 for HTTP transport, or port 4146 for socket
+	    transport.
+          </p></dd>
+<dt><span class="term">-r <em class="replaceable"><code>remote-addr</code></em></span></dt>
+<dd><p>
+	    This specifies a single address that the server will
+	    listen to.  The server should only get configuration
+	    requests from the provisioning system, at a known address,
+	    so this is a simple form of access control.  Use of this
+	    option is not required, but it is recommended.
+          </p></dd>
+<dt><span class="term">-c <em class="replaceable"><code>config-file</code></em></span></dt>
+<dd><p>
+	    This specifies the name and location of
+	    the <span class="command"><strong>aftr</strong></span> configuration file.  For
+	    obvious reasons, this option MUST specify the same file
+	    that is used to configure the running
+	    <span class="command"><strong>aftr</strong></span> daemon.  Default is
+	    <code class="filename">./aftr.conf</code>.
+          </p></dd>
+<dt><span class="term">-v</span></dt>
+<dd><p>
+	    This enables run-time debugging messages.  It should not
+	    be used in production, but it can help to debug or monitor
+	    interactions between <span class="command"><strong>xmlconf.py</strong></span> and
+	    the <span class="command"><strong>aftr</strong></span> daemon.
+          </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="id3003342"></a><h2>SEE ALSO</h2>
+<p>
+    <span class="citerefentry"><span class="refentrytitle">aftr</span>(8)</span>,
+    <span class="citerefentry"><span class="refentrytitle">aftr.conf</span>(5)</span>,
+    <span class="citerefentry"><span class="refentrytitle">xmlclient</span>(8)</span>
+    </p>
+</div>
+<div class="refsect1" title="AUTHOR">
+<a name="id3003381"></a><h2>AUTHOR</h2>
+<p><span class="corpauthor">Internet Systems Consortium</span></p>
+</div>
+</div></body>
+</html>

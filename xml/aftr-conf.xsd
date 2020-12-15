@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2010  Internet Systems Consortium, Inc. ("ISC")
+  
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+  
+  THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+  OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+  PERFORMANCE OF THIS SOFTWARE.
+-->
+<!--
+  Relax NG compact schema for AFTR config
+  Paul.Selkirk@isc.org, May 2010
+  $Id: aftr-conf.xsd 944 2010-10-19 20:12:30Z pselkirk $
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="rpc">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="create"/>
+        <xs:element ref="delete"/>
+        <xs:element ref="get"/>
+        <xs:element ref="flush"/>
+      </xs:choice>
+      <xs:attribute name="message-id"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="create" type="binding"/>
+  <xs:element name="delete" type="binding"/>
+  <xs:element name="get">
+    <xs:complexType>
+      <xs:attribute name="tunnel" type="ipv6Address"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="flush">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="rpc-reply">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="ok"/>
+        <xs:element ref="rpc-error"/>
+        <xs:element ref="conf"/>
+      </xs:choice>
+      <xs:attribute name="message-id"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ok">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="rpc-error">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="error-message"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="error-message" type="xs:string"/>
+  <xs:element name="conf">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="natEntry"/>
+        <xs:element ref="tunnelEntry"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="natEntry" type="binding"/>
+  <xs:element name="tunnelEntry" type="tunnel"/>
+  <xs:simpleType name="ipv4Address">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ipv6Address">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Fa-f0-9:]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="port">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="65535"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="binding">
+    <xs:sequence>
+      <xs:element ref="tunnel"/>
+      <xs:element ref="protocol"/>
+      <xs:element ref="sourceAddress"/>
+      <xs:element ref="sourcePort"/>
+      <xs:element ref="nattedAddress"/>
+      <xs:element ref="nattedPort"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="tunnel" type="ipv6Address"/>
+  <xs:element name="protocol">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="tcp"/>
+        <xs:enumeration value="udp"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="sourceAddress" type="ipv4Address"/>
+  <xs:element name="sourcePort" type="port"/>
+  <xs:element name="nattedAddress" type="ipv4Address"/>
+  <xs:element name="nattedPort" type="port"/>
+  <xs:complexType name="tunnel">
+    <xs:sequence>
+      <xs:element ref="tunnel"/>
+      <xs:element ref="nattedAddress"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

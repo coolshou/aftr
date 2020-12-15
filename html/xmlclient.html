@@ -1,0 +1,161 @@
+<!--
+ - Copyright (C) 2010 Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+<!-- $Id$ -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>xmlclient.py</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="xmlclient.py">
+<a name="id2836837"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>Name</h2>
+<p><span class="application">xmlclient.py</span> &#8212; remote configuration client for aftr</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">xmlclient.py</code>   <em class="replaceable"><code>aftr-addr</code></em>  [<em class="replaceable"><code>command</code></em>]</p></div>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="id2837308"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term">aftr-addr</span></dt>
+<dd><p>
+	    This is the address (IPv4 or IPv6) the the target AFTR.
+          </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="COMMANDS">
+<a name="id2837331"></a><h2>COMMANDS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term">create 
+	  <em class="replaceable"><code>user-ipv6</code></em>
+	  <em class="replaceable"><code>protocol</code></em>
+	  <em class="replaceable"><code>src-ipv4</code></em>
+	  <em class="replaceable"><code>src-port</code></em>
+	  <em class="replaceable"><code>nat-ipv4</code></em>
+	  <em class="replaceable"><code>nat-port</code></em>
+	</span></dt>
+<dd><p>
+	    This requests the aftr to create a port mapping.
+          </p></dd>
+<dt><span class="term">create 
+	  <em class="replaceable"><code>user-ipv6</code></em>
+	  <em class="replaceable"><code>nat-ipv4</code></em>
+	</span></dt>
+<dd><p>
+	    This requests the aftr to create a tunnel entry,
+	    using <em class="replaceable"><code>nat-ipv4</code></em> as the natted
+	    IPv4 address for all future port mappings on this tunnel
+	    (dynamic as well as static).
+          </p></dd>
+<dt><span class="term">delete
+	  <em class="replaceable"><code>user-ipv6</code></em>
+	  <em class="replaceable"><code>protocol</code></em>
+	  <em class="replaceable"><code>src-ipv4</code></em>
+	  <em class="replaceable"><code>src-port</code></em>
+	  <em class="replaceable"><code>nat-ipv4</code></em>
+	  <em class="replaceable"><code>nat-port</code></em>
+	</span></dt>
+<dd></dd>
+<dt><span class="term">delete
+	  <em class="replaceable"><code>user-ipv6</code></em>
+	  <em class="replaceable"><code>protocol</code></em>
+	  <em class="replaceable"><code>src-ipv4</code></em>
+	  <em class="replaceable"><code>src-port</code></em>
+	</span></dt>
+<dd></dd>
+<dt><span class="term">delete
+	  <em class="replaceable"><code>protocol</code></em>
+	  <em class="replaceable"><code>nat-ipv4</code></em>
+	  <em class="replaceable"><code>nat-port</code></em>
+	</span></dt>
+<dd><p>
+	    These three forms of the <strong class="userinput"><code>delete</code></strong>
+	    command all request the aftr to delete a port mapping.
+	    The mapping can be fully specified (first form), but a
+	    mapping can also be uniquely identifed by either internal
+	    parameters (second form) or external parameters (third
+	    form).
+          </p></dd>
+<dt><span class="term">delete
+	  <em class="replaceable"><code>user-ipv6</code></em>
+	</span></dt>
+<dd><p>
+	    This requests the aftr to delete all port mappings
+	    (dynamic as well as static) and other state associated
+	    with the given tunnel address.  This is often done prior
+	    to moving the customer to a new natted IPv4 address.
+          </p></dd>
+<dt><span class="term">flush</span></dt>
+<dd><p>
+	    This requests the aftr to remove all static port mappings
+	    and configured tunnel entries.  Note that this is a very
+	    drastic action, and should only be undertaken if (for
+	    example) the aftr configuration is seriously out of sync
+	    with the provisioning system.
+          </p></dd>
+<dt><span class="term">get <em class="replaceable"><code>user-ipv6</code></em></span></dt>
+<dd><p>
+	    This requests the aftr to report all static port mappings
+	    associated with the given tunnel address.
+          </p></dd>
+<dt><span class="term">get</span></dt>
+<dd><p>
+	    This requests the aftr to report all static port mappings,
+	    and all configured tunnels without static port mappings.
+          </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SCRIPTING">
+<a name="id2837591"></a><h2>SCRIPTING</h2>
+<p>
+      If no commands are given on the command line,
+      <span class="command"><strong>xmlclient.py</strong></span> will read commands from
+      stdin.  This allows the provisioning system to accumulate
+      changes for a given AFTR, and send them all at once.
+    </p>
+<p>
+      In general, it is probably easier for the provisioning system to
+      send requests immediately, and get replies immediately.
+      However, some operators may prefer to batch up requests, and
+      this method sends multiple requests over an open connection,
+      without having to establish a connection for each request.
+    </p>
+<p>
+      Example:<br>
+      <strong class="userinput"><code>xmlclient.py 2001::500 &lt;script</code></strong>
+    </p>
+<p>
+      where <code class="filename">script</code> contains:<br>
+      <strong class="userinput"><code>create 2001::525a:8c5a:30d4:e36e tcp 192.168.0.88 6265 198.18.200.174 5005</code></strong><br>
+      <strong class="userinput"><code>create 2001::835c:1eff:8d66:22fc tcp 192.168.1.138 3877 198.18.200.121 5572</code></strong><br>
+      <strong class="userinput"><code>create 2001::e3:9a2f:8abf:40de:2d87 udp 192.168.0.92 7356 198.18.200.149 5547</code></strong><br>
+    </p>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="id2837652"></a><h2>SEE ALSO</h2>
+<p>
+    <span class="citerefentry"><span class="refentrytitle">xmlconf</span>(8)</span>
+    </p>
+</div>
+<div class="refsect1" title="AUTHOR">
+<a name="id2837671"></a><h2>AUTHOR</h2>
+<p><span class="corpauthor">Internet Systems Consortium</span></p>
+</div>
+</div></body>
+</html>

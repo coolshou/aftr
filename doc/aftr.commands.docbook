@@ -1,0 +1,573 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+              "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+              [<!ENTITY mdash "&#8212;">]>
+<!--
+ - Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<!-- File:  $Id: aftr.commands.docbook 691 2010-07-02 07:21:53Z fdupont $ -->
+<refentry xmlns:xi="http://www.w3.org/2001/XInclude">
+  <refentryinfo>
+     <date>Jan 14, 2010</date>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle><filename>aftr.commands</filename></refentrytitle>
+    <manvolnum>5</manvolnum>
+    <refmiscinfo>AFTR</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname><filename>aftr.command</filename></refname>
+    <refpurpose>interactive commands for aftr</refpurpose>
+  </refnamediv>
+
+  <docinfo>
+    <copyright>
+      <year>2009</year>
+      <year>2010</year>
+      <holder>Internet Systems Consortium, Inc. ("ISC")</holder>
+    </copyright>
+  </docinfo>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>aftr.commands</command>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>DESCRIPTION</title>
+    <para>
+      The <command>aftr</command> daemon runs in the background.
+      After it starts, it can be controlled interactively from a
+      control channel (aka. a session).
+    </para>
+    <para>
+      All of the reloadable configuration commands can be allowed to run
+      from the command line, to add or change configuration.
+      In addition, the following commands can be run interactively.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>INTERACTIVE COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>abort</command></term>
+        <listitem>
+        <para>
+          Call <refentrytitle>abort</refentrytitle><manvolnum>3</manvolnum>
+          to create a core file. Please try to use it only on forked processes.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>echo <replaceable>xxx</replaceable></command></term>
+        <listitem>
+        <para>
+	  Echo the command. This can be used for an external tool to
+	  synchronize with the AFTR daemon.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>fork</command></term>
+        <listitem>
+        <para>
+          Fork the <command>aftr</command> process. In the parent the current
+          session is closed (so after this command you'll talk only to the
+          child) and other activities, including packet forwarding, are
+          continued. In the child all file descriptors at the exception of the
+          current session are closed.
+        </para>
+        <para>
+          This command should be used before to execution an expensive
+          and atomic operation like list commands or some debug
+          commands, and of course the abort command.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>help <optional>all</optional></command></term>
+        <listitem>
+        <para>
+          List available or all commands.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>kill</command></term>
+        <listitem>
+        <para>
+          Orderly kill the <command>aftr</command> process.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>load <replaceable>file</replaceable></command></term>
+        <listitem>
+        <para>
+          Redirect the input of the current session from the content
+          of the file.  This is done in an atomic way (i.e., there is
+          no other activity during the operation) but exists if a
+          command fails.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>quit</command></term>
+        <listitem>
+        <para>
+          Obsolete, use <command>session close</command> (for closing
+          the current session) or <command>kill</command> (for killing
+          the process).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>reboot</command></term>
+        <listitem>
+        <para>
+          Reboot the whole process.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>reload</command></term>
+        <listitem>
+        <para>
+          Reload the section two part of the config file. This is sliced with
+          the packet forwarding, but not with session reading (so you can't
+          execute a command until reload is finished).
+        </para>
+        <para>
+          The reload process uses a generation system: static NAT,
+          PRR/A+P and no-NAT entries in the reloaded file are put in
+          the next generation.  If the reload succeeds, global entries
+          in older generations are garbaged collected, if it fails new
+          generation entries are backtracked to the previous
+          generation. Garbage collection and backtracking are sliced
+          with the packet forwarding, another reload command is
+          forbidden until they finish so a reload flushes the input
+          buffer of the current session.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>show dropped|stat</command></term>
+        <listitem>
+        <para>
+          Aliases of <command>debug dropped</command> and
+          <command>debug stat</command>, display dropped packet and
+          general statistics.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>DEBUG COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>noop</command></term>
+        <listitem>
+        <para>
+          Returns <computeroutput>LOG: alive</computeroutput>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug check <optional>nat|nonat|pool|session|tunnel</optional></command></term>
+        <listitem>
+        <para>
+          Performs some sanity checks on structures. Reserved to
+          expert usage on a forked process (or better core file
+          debugged with gdb). Note it uses recusive deep structure
+          walking so can eat a lot of stack.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug disable <optional>clear</optional></command></term>
+        <listitem>
+        <para>
+          Disable per-tunnel debug counters. Optionally clear them.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug dropped</command></term>
+        <listitem>
+        <para>
+          This displays the dropped packet statistics with reasons.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug enable <replaceable>addr</replaceable></command></term>
+        <listitem>
+        <para>
+          Enable per-tunnel debug counters for the tunnel with
+          <replaceable>addr</replaceable> remote IPv6 address.
+          Note the counters can be incremented only when the
+          involved tunnel is known, for instance, only after reassembly.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug fragment IPv6|in|out</command></term>
+        <listitem>
+        <para>
+          This displays the list of IPv4 or IPv6 fragments awaiting reassembly.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug fragment <replaceable>addr</replaceable></command></term>
+        <listitem>
+        <para>
+          This displays information about a single fragment or
+          fragment chain.
+          <replaceable>add</replaceable>> is the memory address of the
+          fragment structure (from a previous <command>debug
+          fragment</command> command).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug hash</command></term>
+        <listitem>
+        <para>
+          This displays some statistics about the various hash tables
+          (fragment, nat, and tunnel).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug nat</command></term>
+        <listitem>
+        <para>
+          This displays some information about the nat hash table and
+          entry table.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug nat <replaceable>addr</replaceable></command></term>
+        <listitem>
+        <para>
+          This displays detailed information about a single nat binding.
+          <replaceable>addr</replaceable> is the memory address of the nat
+          structure (from a previous <command>debug nat</command> command).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug nonat</command></term>
+        <listitem>
+        <para>
+          This displays the list of no-nat tunnel entries.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug pool</command></term>
+        <listitem>
+        <para>
+          This displays the global IPv4 addresses that will be used
+          for NAT mapping.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug session</command></term>
+        <listitem>
+        <para>
+          This displays the control channel session types with the
+          number of active sessions.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug stat</command></term>
+        <listitem>
+        <para>
+          This displays some general statistics about packets in and out.
+          If per-tunnel debug counters are enable, displays them.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug tunnel</command></term>
+        <listitem>
+        <para>
+          This displays some information about the tunnel table.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug tunnel <replaceable>IPv6_remote</replaceable></command></term>
+        <listitem>
+        <para>
+          This displays some information about a single tunnel.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>DELETE COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>delete acl6 <replaceable>IPv6_address</replaceable></command></term>
+        <listitem>
+        <para>
+          This removes the IPv6 ACL entry with the IPv6 address.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>delete nat <replaceable>IPv6_remote</replaceable> tcp|udp <replaceable>IPv4</replaceable> <replaceable>port</replaceable></command></term>
+        <listitem>
+        <para>
+          This removes a static or dynamic NAT binding.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>delete nonat <replaceable>IPv6_remote</replaceable></command></term>
+        <listitem>
+        <para>
+          This removes a no-nat tunnel entry.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>delete private <replaceable>IPv4_address</replaceable></command></term>
+        <listitem>
+        <para>
+          Look at zone zero configuration commands.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>delete prr <replaceable>IPv6_remote</replaceable> tcp|udp <replaceable>IPv4</replaceable> <replaceable>port</replaceable></command></term>
+        <listitem>
+        <para>
+          This removes a Port-Range Router/A+P null NAT binding.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>delete tunnel <replaceable>IPv6_remote</replaceable></command></term>
+        <listitem>
+        <para>
+          This removes a tunnel and all NAT bindings associated with it.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>LIST COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>list acl6</command></term>
+        <listitem>
+        <para>
+          List IPv6 ACLs.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>list default</command></term>
+        <listitem>
+        <para>
+          List all the default values which can be set by a
+          'default'/'global' command.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>list nat <optional>conf|static|prr|dynamic|all|global</optional></command></term>
+        <listitem>
+        <para>
+          List the NAT entries in the configuration file
+          format. Default is to list only the configured ('conf') NAT
+          entries. 'global' lists the the configured global (i.e., not
+          by a session) active (i.e., not to be garbaged collected after
+          a reload) NAT entries.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>list nonat</command></term>
+        <listitem>
+        <para>
+          List all the No-NAT tunnel entries in the configuration file format.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>list pool</command></term>
+        <listitem>
+        <para>
+          List the NATted source addresses with current port ranges in the
+          configuration file format.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>list session <optional><replaceable>name</replaceable>|<replaceable>generation</replaceable></optional></command></term>
+        <listitem>
+        <para>
+          List the static NAT, PRR/A+P and no-NAT entries created by
+          the current session or the session
+          with <replaceable>name</replaceable> or
+          with <replaceable>generation</replaceable> (note these
+          entries will be flushed when the session will be closed so
+          this command can be used to get them in order to include
+          them in the config).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>list tunnel</command></term>
+        <listitem>
+        <para>
+          List the tunnel entries in the configuration file format,
+          including specific MTU (if different from the default MTU).
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>SESSION COMMANDS</title>
+    <para>
+      These commands deal directly with sessions (aka. control channels).
+    </para>
+    <variablelist>
+      <varlistentry>
+        <term><command>session close <optional><replaceable>name</replaceable>|<replaceable>generation</replaceable></optional></command></term>
+        <listitem>
+        <para>
+          Close the current or designed session. Delete all the static NAT,
+          PRR/A+P and no-NAT entries created by the current session and which
+          were not promoted to global/permanent entries by a reload.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>session config on|off</command></term>
+        <listitem>
+        <para>
+          Enable/disable the section two configuration commands. By default
+          configuration commands must go to the config file.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>session log on|off</command></term>
+        <listitem>
+        <para>
+          Log errors or don't for the current session. Default is on.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>session name <optional><replaceable>name</replaceable></optional></command></term>
+        <listitem>
+        <para>
+          Display or set the name of the current session. The stdio
+          initial session is statically named 'tty'.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>session notify on|off</command></term>
+        <listitem>
+        <para>
+	  Log tunnel removal or don't to the current session. Default is off.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+    <citerefentry>
+      <refentrytitle>aftr</refentrytitle>
+      <manvolnum>8</manvolnum>
+    </citerefentry>,
+    <citerefentry>
+      <refentrytitle>aftr.conf</refentrytitle>
+      <manvolnum>5</manvolnum>
+    </citerefentry>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+    <para><corpauthor>Internet Systems Consortium</corpauthor></para>
+  </refsect1>
+
+</refentry>

@@ -1,0 +1,90 @@
+.\" Copyright (C) 2010 Internet Systems Consortium, Inc. ("ISC")
+.\" 
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+.\" REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+.\" AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+.\" INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+.\" LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+.\" OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id$
+.\"
+.hy 0
+.ad l
+'\" t
+.\"     Title: xmlconf.py
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: October 10, 2010
+.\"    Manual: AFTR
+.\"    Source: AFTR
+.\"  Language: English
+.\"
+.TH "XMLCONF\&.PY" "8" "October 10, 2010" "AFTR" "AFTR"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+xmlconf.py \- remote configuration daemon for aftr
+.SH "SYNOPSIS"
+.HP 11
+\fBxmlconf\&.py\fR [\fB\-l\ \fR\fB\fIlistening\-addr\fR\fR] [\fB\-p\ \fR\fB\fIlistening\-port\fR\fR] [\fB\-r\ \fR\fB\fIremote\-addr\fR\fR] [\fB\-c\ \fR\fB\fIconfig\-file\fR\fR] [\fB\-v\fR]
+.SH "OPTIONS"
+.PP
+\-l \fIlistening\-addr\fR
+.RS 4
+This specifies a local address on which to listen\&. If not specified, it listens on all local addresses\&.
+.RE
+.PP
+\-p \fIlistening\-port\fR
+.RS 4
+This specifies a local port on which to listen\&. Defaults to port 4148 for HTTP transport, or port 4146 for socket transport\&.
+.RE
+.PP
+\-r \fIremote\-addr\fR
+.RS 4
+This specifies a single address that the server will listen to\&. The server should only get configuration requests from the provisioning system, at a known address, so this is a simple form of access control\&. Use of this option is not required, but it is recommended\&.
+.RE
+.PP
+\-c \fIconfig\-file\fR
+.RS 4
+This specifies the name and location of the
+\fBaftr\fR
+configuration file\&. For obvious reasons, this option MUST specify the same file that is used to configure the running
+\fBaftr\fR
+daemon\&. Default is
+\&./aftr\&.conf\&.
+.RE
+.PP
+\-v
+.RS 4
+This enables run\-time debugging messages\&. It should not be used in production, but it can help to debug or monitor interactions between
+\fBxmlconf\&.py\fR
+and the
+\fBaftr\fR
+daemon\&.
+.RE
+.SH "SEE ALSO"
+.PP
+\fBaftr\fR(8),
+\fBaftr.conf\fR(5),
+\fBxmlclient\fR(8)
+.SH "AUTHOR"
+.PP
+Internet Systems Consortium
+.SH "COPYRIGHT"
+.br
+Copyright \(co 2010 Internet Systems Consortium, Inc. ("ISC")
+.br

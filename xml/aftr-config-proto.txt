@@ -1,0 +1,471 @@
+AFTR Remote Configuration Protocol
+
+1. Introduction
+
+This document specifies a protocol for remotely managing the static
+binding table for ISC AFTR.
+
+This protocol is an XML-encoded RPC mechanism, which borrows heavily
+from NETCONF, but is trimmed down to the specific needs of AFTR
+configuration.
+
+2. Transport Considerations
+
+RPC transactions can be layered on different transport protocols.
+Transport connections can be secured or unsecured, depending on the
+needs of the operator.
+
+Three transport protocols that spring to mind are the following.
+
+2.1 HTTP/HTTPS
+
+RPC requests can be transported in HTTP or HTTPS POST.
+
+2.2 SSH
+
+RPC transactions could be transported over an SSH channel.  Unlike
+NETCONF, there would be no transport-specific message framing (NETCONF
+uses the magic string "]]>]]>" between messages).  Instead, the next
+top-level tag element (e.g. <rpc>) marks the beginning of the next
+message.
+
+2.3 TCP Socket
+
+If no security is needed, RPC transactions could be transported over
+a plain TCP socket.  Aside from connection setup, operation would be
+identical to the SSH case.
+
+3. XML Consisderations
+
+RPC transactions are encoded in XML.
+
+All protocol elements are defined in the following namespace:
+http://aftr.isc.org/mapping/1.0
+
+Any future (post-deployment) changes to the protocol will require
+changes to the namespace (e.g. by updating the version number).
+
+4. RPC Model
+
+This protocol uses an RPC-based communications model.
+
+The provisioning system always initiates the transaction with an <rpc>
+element, and the AFTR always completes the transaction with an
+<rpc-reply> element.
+
+4.1 <rpc> Element
+
+The <rpc> element is used to enclose a configuration request from the
+provisioning system to the AFTR.
+
+The <rpc> element encloses exactly one operation (see section 5).  
+
+Any attributes in the <rpc> element will be returned in the
+corresponding <rpc-reply> element.  Attributes could include a
+NETCONF-style message-id, or any other opaque cookie to identify the
+transaction.  Attributes are optional, and are not interpreted by the
+AFTR.
+
+4.2 <rpc-reply> Element
+
+The <rpc-reply> message is sent in response to an <rpc> operation.
+
+Any attributes in the <rpc> element are returned in the corresponding
+<rpc-reply> element.
+
+The <rpc-reply> message encloses either an <ok> or <rpc-error>
+element.
+
+4.3 <rpc-error> Element
+
+The <rpc-error> element is sent in <rpc-reply> messages if an error or
+warning occurs during the processing of an <rpc> request.
+
+The <rpc-error> element encloses a text string describing the error
+condition.
+
+4.4 <ok> Element
+
+The <ok> element is sent in an <rpc-reply> message if no errors or
+warnings occurred during the processing of an <rpc> request.
+
+If the <rpc-reply> element encloses <rpc-error> elements, then any
+<ok> elements that are also enclosed MUST include sufficient
+contextual information to identify the successful operations.
+
+If all operations within an <rpc> request complete without error or
+warning, then the <rpc-reply> element MAY contain a single <ok>.
+
+4.5 Pipelining and Batching
+
+<rpc> requests MUST be processed serially by the AFTR.  Additional
+<rpc> requests MAY be sent before previous ones have been completed.
+The AFTR MUST send responses only in the order the requests were
+received.
+
+5. Protocol Operations
+
+The following protocol operations may appear within an <rpc> element.
+
+5.1 <create>
+
+This operation creates a tunnel or a static NAT binding.
+
+For tunnels, the required elements are
+
+  <tunnel> - the IPv6 address of the customer's B4
+
+  <nattedAddress> - the requested external IPv4 address
+
+For static NAT bindings, the required elements are
+
+  <tunnel> - the IPv6 address of the customer's B4
+
+  <protocol> - 'udp' or 'tcp'
+
+  <sourceAddress> - the IPv4 address of the customer's device
+
+  <sourcePort> - an application port on the customer's device
+
+  <nattedAddress> - the requested external IPv4 address
+
+  <nattedPort> - the requested external port
+
+For example
+  <rpc message-id=101>
+    <create>
+      <tunnel>2001:0:0:1::2</tunnel>
+      <protocol>tcp</protocol>
+      <sourceAddress>10.0.1.2</sourceAddress>
+      <sourcePort>5001</sourcePort>
+      <nattedAddress>198.18.200.2</nattedAddress>
+      <nattedPort>5001</nattedPort>
+    </create>
+  </rpc>
+
+If the operation succeeds, the AFTR returns <ok>.
+
+If the requested tunnel doesn't exist, it is created. If it exists
+with another external address, the AFTR returns an error.
+
+If the requested binding already exists as specified, the AFTR returns
+<ok>.
+
+If the ipv6/proto/src-addr/src-port 4-tuple is already bound to a
+different external port, the AFTR deletes the old binding, creates the
+new binding, and returns <ok>.
+
+If the requested proto/ext-addr/ext-port binding is already assigned
+to a different internal address/port, the AFTR deletes the old
+binding, creates the new binding, and returns <ok>.
+
+If the requested proto/ext-addr/ext-port binding is already assigned
+to a different tunnel, the AFTR returns "ERROR: port assigned to
+another subscriber".
+
+If the requested external address not managed by the AFTR, the AFTR
+returns "ERROR: external address not managed".
+
+If the requested external port is inside the pre-configured dynamic
+port range, the AFTR returns "ERROR: external port out-of-range".
+
+5.2 <delete>
+
+This operation deletes a tunnel or static NAT binding.
+
+For tunnels, the required elements are
+
+  <tunnel> - the IPv6 address of the customer's B4
+
+For static NAT bindings, the elements are
+
+  <tunnel> - the IPv6 address of the customer's B4
+
+  <protocol> - udp or tcp
+
+  <sourceAddress> - the IPv4 address of the customer's device
+
+  <sourcePort> - an application port on the customer's device
+
+  <nattedAddress> - the external IPv4 address
+
+  <nattedPort> - the external port
+
+For example
+  <rpc message-id=102>
+    <delete>
+      <tunnel>2001:0:0:1::2</tunnel>
+      <protocol>tcp</protocol>
+      <sourceAddress>10.0.1.2</sourceAddress>
+      <sourcePort>5001</sourcePort>
+      <nattedAddress>198.18.200.2</nattedAddress>
+      <nattedPort>5001</nattedPort>
+    </delete>
+  </rpc>
+
+Note that, to uniquely identify a binding, the provisioning system MAY
+send either tunnel/protocol/sourceAddress/sourcePort or protocol/
+nattedAddress/nattedPort.  One subset or the other may be preferred,
+depending on how the AFTR is implemented.  If the provisioning system
+does not know which subset the AFTR requires, it SHOULD send all
+elements.
+
+For example, either of the following will identify a static mapping.
+  <rpc>
+    <delete>
+      <tunnel>2001:0:0:1::2</tunnel>
+      <protocol>tcp</protocol>
+      <sourceAddress>10.0.1.2</sourceAddress>
+      <sourcePort>5001</sourcePort>
+    </delete>
+  </rpc>
+OR
+  <rpc>
+    <delete>
+      <protocol>tcp</protocol>
+      <nattedAddress>198.18.200.2</nattedAddress>
+      <nattedPort>5001</nattedPort>
+    </delete>
+  </rpc>
+
+If the <delete> operation contains just a <tunnel> element, the AFTR
+will delete all bindings (static or dynamic) associated with that
+tunnel address, and will remove the association between the customer's
+IPv6 address and the natted IPv4 address.
+
+For example
+  <rpc>
+    <delete>
+      <tunnel>2001:0:0:1::2</tunnel>
+    </delete>
+  </rpc>
+
+Note that deleting all static NAT bindings on a tunnel will not delete
+the tunnel.
+
+If the operation succeeds, the AFTR returns <ok>.
+
+If the requested binding does not exist, the AFTR returns "ERROR: no
+mapping found".
+
+5.3 <get>
+
+This operation requests all or part of the static mapping and
+tunnel tables.
+
+With no attributes, the <get> operation returns the entire table.
+
+For example
+  <rpc message-id=103>
+    <get/>
+  </rpc>
+
+The optional 'tunnel' attribute specifies the IPv6 address of a
+customer's B4.  In this case, the <get> operation returns the static
+mappings for that customer.
+
+For example
+  <rpc message-id=103>
+    <get tunnel="2001:0:0:1::2"/>
+  </rpc>
+
+If the operation succeeds, the AFTR returns a <conf> element, which in
+turn encloses zero or more <natEntry> and <tunnelEntry> elements.
+
+For example
+  <rpc-reply message-id=103>
+    <conf>
+      <tunnelEntry>
+        <tunnel>2001:0:0:1::1</tunnel>
+        <nattedAddress>198.18.200.1</nattedAddress>
+      </tunnelEntry>
+      <natEntry>
+        <tunnel>2001:0:0:1::2</tunnel>
+        <protocol>tcp</protocol>
+        <sourceAddress>10.0.1.2</sourceAddress>
+        <sourcePort>5001</sourcePort>
+        <nattedAddress>198.18.200.2</nattedAddress>
+        <nattedPort>5001</nattedPort>
+      </natEntry>
+      <natEntry>
+        <tunnel>2001:0:0:1::2</tunnel>
+        <protocol>udp</protocol>
+        <sourceAddress>10.0.1.2</sourceAddress>
+        <sourcePort>5001</sourcePort>
+        <nattedAddress>198.18.200.2</nattedAddress>
+        <nattedPort>5001</nattedPort>
+      </natEntry>
+    </conf>
+  </rpc-reply>
+
+5.4 <flush>
+
+This operation deletes all static mappings and tunnels from the AFTR.
+
+For example
+  <rpc message-id=104>
+    <flush/>
+  </rpc>
+
+If the operation succeeds, the AFTR returns <ok>.
+
+Note that this does not delete dynamic mappings or tunnels.
+
+6. Security Considerations
+
+If insecure transport (HTTP, TCP socket) is used, then other means
+SHOULD be used to ensure that only authorized users can communicate
+with the AFTR.
+
+Appendix A: Schema in Relax NG Compact Format
+
+namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
+namespace aftr = "http://aftr.isc.org/mapping/1.0"
+
+rpc = element rpc {
+    attribute message-id { text }?,
+    ( create | delete | get | flush ) }
+
+create = element create { binding }
+delete = element delete { binding }
+get = element get { attribute tunnel { ipv6Address }? }
+flush = element flush { empty }
+
+rpc-reply = element rpc-reply {
+    attribute message-id { text }?,
+    ( ok | rpc-error | conf ) }
+
+ok = element ok { empty }
+
+rpc-error = element rpc-error {
+    element error-message { text } }
+
+conf = element conf {
+     element natEntry { binding }* &
+     element tunnelEntry { tunnel }* }
+
+ipv4Address = xsd:string {
+    pattern = "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}" }
+ipv6Address = xsd:string { pattern = "[A-Fa-f0-9:]+" }
+port = xsd:decimal { minInclusive = "1" maxInclusive = "65535" }
+binding = 
+    element tunnel { ipv6Address },
+    element protocol { "tcp" | "udp" },
+    element sourceAddress { ipv4Address },
+    element sourcePort { port },
+    element nattedAddress { ipv4Address },
+    element nattedPort { port }
+tunnel =
+    element tunnel { ipv6Address },
+    element nattedAddress { ipv4Address }
+
+Appendix B: Schema in XSD Format
+
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="rpc">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="create"/>
+        <xs:element ref="delete"/>
+        <xs:element ref="get"/>
+        <xs:element ref="flush"/>
+      </xs:choice>
+      <xs:attribute name="message-id"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="create" type="binding"/>
+  <xs:element name="delete" type="binding"/>
+  <xs:element name="get">
+    <xs:complexType>
+      <xs:attribute name="tunnel" type="ipv6Address"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="flush">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="rpc-reply">
+    <xs:complexType>
+      <xs:choice>
+        <xs:element ref="ok"/>
+        <xs:element ref="rpc-error"/>
+        <xs:element ref="conf"/>
+      </xs:choice>
+      <xs:attribute name="message-id"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ok">
+    <xs:complexType/>
+  </xs:element>
+  <xs:element name="rpc-error">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="error-message"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="error-message" type="xs:string"/>
+  <xs:element name="conf">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="natEntry"/>
+        <xs:element ref="tunnelEntry"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="natEntry" type="binding"/>
+  <xs:element name="tunnelEntry" type="tunnel"/>
+  <xs:simpleType name="ipv4Address">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ipv6Address">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Fa-f0-9:]+"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="port">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="1"/>
+      <xs:maxInclusive value="65535"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="binding">
+    <xs:sequence>
+      <xs:element ref="tunnel"/>
+      <xs:element ref="protocol"/>
+      <xs:element ref="sourceAddress"/>
+      <xs:element ref="sourcePort"/>
+      <xs:element ref="nattedAddress"/>
+      <xs:element ref="nattedPort"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="tunnel" type="ipv6Address"/>
+  <xs:element name="protocol">
+    <xs:simpleType>
+      <xs:restriction base="xs:token">
+        <xs:enumeration value="tcp"/>
+        <xs:enumeration value="udp"/>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:element>
+  <xs:element name="sourceAddress" type="ipv4Address"/>
+  <xs:element name="sourcePort" type="port"/>
+  <xs:element name="nattedAddress" type="ipv4Address"/>
+  <xs:element name="nattedPort" type="port"/>
+  <xs:complexType name="tunnel">
+    <xs:sequence>
+      <xs:element ref="tunnel"/>
+      <xs:element ref="nattedAddress"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+
+Appendix C: Edit History
+
+2010-05-27 first draft
+2010-06-02 remove DISCUSS sections
+2010-06-08 add delete-tunnel functionality
+2010-06-24 clarified that <get> on an empty table returns empty <conf/>
+2010-09-01 removed support for multiple operations in one request

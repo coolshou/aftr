@@ -1,0 +1,331 @@
+<!--
+ - Copyright (C) 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+<!-- $Id$ -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>aftr.commands</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="aftr.commands">
+<a name="id2731947"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>Name</h2>
+<p><code class="filename">aftr.command</code> &#8212; interactive commands for aftr</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">aftr.commands</code> </p></div>
+</div>
+<div class="refsect1" title="DESCRIPTION">
+<a name="id2731512"></a><h2>DESCRIPTION</h2>
+<p>
+      The <span class="command"><strong>aftr</strong></span> daemon runs in the background.
+      After it starts, it can be controlled interactively from a
+      control channel (aka. a session).
+    </p>
+<p>
+      All of the reloadable configuration commands can be allowed to run
+      from the command line, to add or change configuration.
+      In addition, the following commands can be run interactively.
+    </p>
+</div>
+<div class="refsect1" title="INTERACTIVE COMMANDS">
+<a name="id2732457"></a><h2>INTERACTIVE COMMANDS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><span class="command"><strong>abort</strong></span></span></dt>
+<dd><p>
+          Call <span class="refentrytitle">abort</span>(3)
+          to create a core file. Please try to use it only on forked processes.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>echo <em class="replaceable"><code>xxx</code></em></strong></span></span></dt>
+<dd><p>
+	  Echo the command. This can be used for an external tool to
+	  synchronize with the AFTR daemon.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>fork</strong></span></span></dt>
+<dd>
+<p>
+          Fork the <span class="command"><strong>aftr</strong></span> process. In the parent the current
+          session is closed (so after this command you'll talk only to the
+          child) and other activities, including packet forwarding, are
+          continued. In the child all file descriptors at the exception of the
+          current session are closed.
+        </p>
+<p>
+          This command should be used before to execution an expensive
+          and atomic operation like list commands or some debug
+          commands, and of course the abort command.
+        </p>
+</dd>
+<dt><span class="term"><span class="command"><strong>help [<span class="optional">all</span>]</strong></span></span></dt>
+<dd><p>
+          List available or all commands.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>kill</strong></span></span></dt>
+<dd><p>
+          Orderly kill the <span class="command"><strong>aftr</strong></span> process.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>load <em class="replaceable"><code>file</code></em></strong></span></span></dt>
+<dd><p>
+          Redirect the input of the current session from the content
+          of the file.  This is done in an atomic way (i.e., there is
+          no other activity during the operation) but exists if a
+          command fails.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>quit</strong></span></span></dt>
+<dd><p>
+          Obsolete, use <span class="command"><strong>session close</strong></span> (for closing
+          the current session) or <span class="command"><strong>kill</strong></span> (for killing
+          the process).
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>reboot</strong></span></span></dt>
+<dd><p>
+          Reboot the whole process.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>reload</strong></span></span></dt>
+<dd>
+<p>
+          Reload the section two part of the config file. This is sliced with
+          the packet forwarding, but not with session reading (so you can't
+          execute a command until reload is finished).
+        </p>
+<p>
+          The reload process uses a generation system: static NAT,
+          PRR/A+P and no-NAT entries in the reloaded file are put in
+          the next generation.  If the reload succeeds, global entries
+          in older generations are garbaged collected, if it fails new
+          generation entries are backtracked to the previous
+          generation. Garbage collection and backtracking are sliced
+          with the packet forwarding, another reload command is
+          forbidden until they finish so a reload flushes the input
+          buffer of the current session.
+        </p>
+</dd>
+<dt><span class="term"><span class="command"><strong>show dropped|stat</strong></span></span></dt>
+<dd><p>
+          Aliases of <span class="command"><strong>debug dropped</strong></span> and
+          <span class="command"><strong>debug stat</strong></span>, display dropped packet and
+          general statistics.
+        </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="DEBUG COMMANDS">
+<a name="id2732679"></a><h2>DEBUG COMMANDS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><span class="command"><strong>noop</strong></span></span></dt>
+<dd><p>
+          Returns <code class="computeroutput">LOG: alive</code>.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug check [<span class="optional">nat|nonat|pool|session|tunnel</span>]</strong></span></span></dt>
+<dd><p>
+          Performs some sanity checks on structures. Reserved to
+          expert usage on a forked process (or better core file
+          debugged with gdb). Note it uses recusive deep structure
+          walking so can eat a lot of stack.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug disable [<span class="optional">clear</span>]</strong></span></span></dt>
+<dd><p>
+          Disable per-tunnel debug counters. Optionally clear them.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug dropped</strong></span></span></dt>
+<dd><p>
+          This displays the dropped packet statistics with reasons.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug enable <em class="replaceable"><code>addr</code></em></strong></span></span></dt>
+<dd><p>
+          Enable per-tunnel debug counters for the tunnel with
+          <em class="replaceable"><code>addr</code></em> remote IPv6 address.
+          Note the counters can be incremented only when the
+          involved tunnel is known, for instance, only after reassembly.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug fragment IPv6|in|out</strong></span></span></dt>
+<dd><p>
+          This displays the list of IPv4 or IPv6 fragments awaiting reassembly.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug fragment <em class="replaceable"><code>addr</code></em></strong></span></span></dt>
+<dd><p>
+          This displays information about a single fragment or
+          fragment chain.
+          <em class="replaceable"><code>add</code></em>&gt; is the memory address of the
+          fragment structure (from a previous <span class="command"><strong>debug
+          fragment</strong></span> command).
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug hash</strong></span></span></dt>
+<dd><p>
+          This displays some statistics about the various hash tables
+          (fragment, nat, and tunnel).
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug nat</strong></span></span></dt>
+<dd><p>
+          This displays some information about the nat hash table and
+          entry table.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug nat <em class="replaceable"><code>addr</code></em></strong></span></span></dt>
+<dd><p>
+          This displays detailed information about a single nat binding.
+          <em class="replaceable"><code>addr</code></em> is the memory address of the nat
+          structure (from a previous <span class="command"><strong>debug nat</strong></span> command).
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug nonat</strong></span></span></dt>
+<dd><p>
+          This displays the list of no-nat tunnel entries.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug pool</strong></span></span></dt>
+<dd><p>
+          This displays the global IPv4 addresses that will be used
+          for NAT mapping.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug session</strong></span></span></dt>
+<dd><p>
+          This displays the control channel session types with the
+          number of active sessions.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug stat</strong></span></span></dt>
+<dd><p>
+          This displays some general statistics about packets in and out.
+          If per-tunnel debug counters are enable, displays them.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug tunnel</strong></span></span></dt>
+<dd><p>
+          This displays some information about the tunnel table.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>debug tunnel <em class="replaceable"><code>IPv6_remote</code></em></strong></span></span></dt>
+<dd><p>
+          This displays some information about a single tunnel.
+        </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="DELETE COMMANDS">
+<a name="id2732977"></a><h2>DELETE COMMANDS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><span class="command"><strong>delete acl6 <em class="replaceable"><code>IPv6_address</code></em></strong></span></span></dt>
+<dd><p>
+          This removes the IPv6 ACL entry with the IPv6 address.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>delete nat <em class="replaceable"><code>IPv6_remote</code></em> tcp|udp <em class="replaceable"><code>IPv4</code></em> <em class="replaceable"><code>port</code></em></strong></span></span></dt>
+<dd><p>
+          This removes a static or dynamic NAT binding.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>delete nonat <em class="replaceable"><code>IPv6_remote</code></em></strong></span></span></dt>
+<dd><p>
+          This removes a no-nat tunnel entry.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>delete private <em class="replaceable"><code>IPv4_address</code></em></strong></span></span></dt>
+<dd><p>
+          Look at zone zero configuration commands.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>delete prr <em class="replaceable"><code>IPv6_remote</code></em> tcp|udp <em class="replaceable"><code>IPv4</code></em> <em class="replaceable"><code>port</code></em></strong></span></span></dt>
+<dd><p>
+          This removes a Port-Range Router/A+P null NAT binding.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>delete tunnel <em class="replaceable"><code>IPv6_remote</code></em></strong></span></span></dt>
+<dd><p>
+          This removes a tunnel and all NAT bindings associated with it.
+        </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="LIST COMMANDS">
+<a name="id2733103"></a><h2>LIST COMMANDS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term"><span class="command"><strong>list acl6</strong></span></span></dt>
+<dd><p>
+          List IPv6 ACLs.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>list default</strong></span></span></dt>
+<dd><p>
+          List all the default values which can be set by a
+          'default'/'global' command.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>list nat [<span class="optional">conf|static|prr|dynamic|all|global</span>]</strong></span></span></dt>
+<dd><p>
+          List the NAT entries in the configuration file
+          format. Default is to list only the configured ('conf') NAT
+          entries. 'global' lists the the configured global (i.e., not
+          by a session) active (i.e., not to be garbaged collected after
+          a reload) NAT entries.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>list nonat</strong></span></span></dt>
+<dd><p>
+          List all the No-NAT tunnel entries in the configuration file format.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>list pool</strong></span></span></dt>
+<dd><p>
+          List the NATted source addresses with current port ranges in the
+          configuration file format.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>list session [<span class="optional"><em class="replaceable"><code>name</code></em>|<em class="replaceable"><code>generation</code></em></span>]</strong></span></span></dt>
+<dd><p>
+          List the static NAT, PRR/A+P and no-NAT entries created by
+          the current session or the session
+          with <em class="replaceable"><code>name</code></em> or
+          with <em class="replaceable"><code>generation</code></em> (note these
+          entries will be flushed when the session will be closed so
+          this command can be used to get them in order to include
+          them in the config).
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>list tunnel</strong></span></span></dt>
+<dd><p>
+          List the tunnel entries in the configuration file format,
+          including specific MTU (if different from the default MTU).
+        </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SESSION COMMANDS">
+<a name="id2733245"></a><h2>SESSION COMMANDS</h2>
+<p>
+      These commands deal directly with sessions (aka. control channels).
+    </p>
+<div class="variablelist"><dl>
+<dt><span class="term"><span class="command"><strong>session close [<span class="optional"><em class="replaceable"><code>name</code></em>|<em class="replaceable"><code>generation</code></em></span>]</strong></span></span></dt>
+<dd><p>
+          Close the current or designed session. Delete all the static NAT,
+          PRR/A+P and no-NAT entries created by the current session and which
+          were not promoted to global/permanent entries by a reload.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>session config on|off</strong></span></span></dt>
+<dd><p>
+          Enable/disable the section two configuration commands. By default
+          configuration commands must go to the config file.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>session log on|off</strong></span></span></dt>
+<dd><p>
+          Log errors or don't for the current session. Default is on.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>session name [<span class="optional"><em class="replaceable"><code>name</code></em></span>]</strong></span></span></dt>
+<dd><p>
+          Display or set the name of the current session. The stdio
+          initial session is statically named 'tty'.
+        </p></dd>
+<dt><span class="term"><span class="command"><strong>session notify on|off</strong></span></span></dt>
+<dd><p>
+	  Log tunnel removal or don't to the current session. Default is off.
+        </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="id2733353"></a><h2>SEE ALSO</h2>
+<p>
+    <span class="citerefentry"><span class="refentrytitle">aftr</span>(8)</span>,
+    <span class="citerefentry"><span class="refentrytitle">aftr.conf</span>(5)</span>
+    </p>
+</div>
+<div class="refsect1" title="AUTHOR">
+<a name="id2733382"></a><h2>AUTHOR</h2>
+<p><span class="corpauthor">Internet Systems Consortium</span></p>
+</div>
+</div></body>
+</html>

@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+# OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+# $Id: aftr-script 936 2010-10-18 05:51:00Z pselkirk $
+
+aftr_start()
+{
+    # bring up the tunnel interface
+    ip link set tun0 up
+
+    # assign addresses (required by some systems)
+    ip addr add 192.0.0.1 peer 192.0.0.2 dev tun0
+    ip -6 addr add 2001::10/64 dev tun0
+
+    # add routes for all endpoint, pool, prr, and nonat addresses
+    ip route add 198.18.0.0/16 dev tun0
+    ip -6 route add 2001::/64 dev tun0
+
+    # nat the pseudo-public pool addr to the machine's real addr
+    iptables -t nat -F
+    iptables -t nat -A POSTROUTING -s 198.18.200.111 \
+      -j SNAT --to-source $PUBLIC
+    iptables -t nat -A PREROUTING -p tcp -d $PUBLIC --dport 60000:65535 \
+      -j DNAT --to-destination 198.18.200.111
+    iptables -t nat -A PREROUTING -p udp -d $PUBLIC --dport 60000:65535 \
+      -j DNAT --to-destination 198.18.200.111
+    iptables -t nat -A OUTPUT -p tcp -d $PUBLIC --dport 60000:65535 \
+      -j DNAT --to-destination 198.18.200.111
+    iptables -t nat -A OUTPUT -p udp -d $PUBLIC --dport 60000:65535 \
+      -j DNAT --to-destination 198.18.200.111
+}
+
+aftr_stop()
+{
+    # stop natting the pseudo-public pool addr
+    iptables -t nat -F
+
+    # bring down the tunnel interface
+    ip link set tun0 down
+}
+
+set -x
+
+# get the machine's real public address
+PUBLIC=`ip addr show dev eth0 | grep -w inet | \
+   awk '{print $2}' | awk -F/ '{print $1}'`
+
+case "$1" in
+start)
+	aftr_start
+	;;
+stop)
+	aftr_stop
+	;;
+*)
+	echo "Usage: $0 start|stop"
+	exit 1
+	;;
+esac
+
+exit 0

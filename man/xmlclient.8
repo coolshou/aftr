@@ -1,0 +1,129 @@
+.\" Copyright (C) 2010 Internet Systems Consortium, Inc. ("ISC")
+.\" 
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+.\" REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+.\" AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+.\" INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+.\" LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+.\" OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id$
+.\"
+.hy 0
+.ad l
+'\" t
+.\"     Title: xmlclient.py
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: October 10, 2010
+.\"    Manual: AFTR
+.\"    Source: AFTR
+.\"  Language: English
+.\"
+.TH "XMLCLIENT\&.PY" "8" "October 10, 2010" "AFTR" "AFTR"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+xmlclient.py \- remote configuration client for aftr
+.SH "SYNOPSIS"
+.HP 13
+\fBxmlclient\&.py\fR \fIaftr\-addr\fR [\fIcommand\fR]
+.SH "OPTIONS"
+.PP
+aftr\-addr
+.RS 4
+This is the address (IPv4 or IPv6) the the target AFTR\&.
+.RE
+.SH "COMMANDS"
+.PP
+create \fIuser\-ipv6\fR \fIprotocol\fR \fIsrc\-ipv4\fR \fIsrc\-port\fR \fInat\-ipv4\fR \fInat\-port\fR
+.RS 4
+This requests the aftr to create a port mapping\&.
+.RE
+.PP
+create \fIuser\-ipv6\fR \fInat\-ipv4\fR
+.RS 4
+This requests the aftr to create a tunnel entry, using
+\fInat\-ipv4\fR
+as the natted IPv4 address for all future port mappings on this tunnel (dynamic as well as static)\&.
+.RE
+.PP
+delete \fIuser\-ipv6\fR \fIprotocol\fR \fIsrc\-ipv4\fR \fIsrc\-port\fR \fInat\-ipv4\fR \fInat\-port\fR
+.RS 4
+.RE
+.PP
+delete \fIuser\-ipv6\fR \fIprotocol\fR \fIsrc\-ipv4\fR \fIsrc\-port\fR
+.RS 4
+.RE
+.PP
+delete \fIprotocol\fR \fInat\-ipv4\fR \fInat\-port\fR
+.RS 4
+These three forms of the
+\fBdelete\fR
+command all request the aftr to delete a port mapping\&. The mapping can be fully specified (first form), but a mapping can also be uniquely identifed by either internal parameters (second form) or external parameters (third form)\&.
+.RE
+.PP
+delete \fIuser\-ipv6\fR
+.RS 4
+This requests the aftr to delete all port mappings (dynamic as well as static) and other state associated with the given tunnel address\&. This is often done prior to moving the customer to a new natted IPv4 address\&.
+.RE
+.PP
+flush
+.RS 4
+This requests the aftr to remove all static port mappings and configured tunnel entries\&. Note that this is a very drastic action, and should only be undertaken if (for example) the aftr configuration is seriously out of sync with the provisioning system\&.
+.RE
+.PP
+get \fIuser\-ipv6\fR
+.RS 4
+This requests the aftr to report all static port mappings associated with the given tunnel address\&.
+.RE
+.PP
+get
+.RS 4
+This requests the aftr to report all static port mappings, and all configured tunnels without static port mappings\&.
+.RE
+.SH "SCRIPTING"
+.PP
+If no commands are given on the command line,
+\fBxmlclient\&.py\fR
+will read commands from stdin\&. This allows the provisioning system to accumulate changes for a given AFTR, and send them all at once\&.
+.PP
+In general, it is probably easier for the provisioning system to send requests immediately, and get replies immediately\&. However, some operators may prefer to batch up requests, and this method sends multiple requests over an open connection, without having to establish a connection for each request\&.
+.PP
+Example:
+.br
+\fBxmlclient\&.py 2001::500 <script\fR
+.PP
+where
+script
+contains:
+.br
+\fBcreate 2001::525a:8c5a:30d4:e36e tcp 192\&.168\&.0\&.88 6265 198\&.18\&.200\&.174 5005\fR
+.br
+\fBcreate 2001::835c:1eff:8d66:22fc tcp 192\&.168\&.1\&.138 3877 198\&.18\&.200\&.121 5572\fR
+.br
+\fBcreate 2001::e3:9a2f:8abf:40de:2d87 udp 192\&.168\&.0\&.92 7356 198\&.18\&.200\&.149 5547\fR
+.br
+.SH "SEE ALSO"
+.PP
+\fBxmlconf\fR(8)
+.SH "AUTHOR"
+.PP
+Internet Systems Consortium
+.SH "COPYRIGHT"
+.br
+Copyright \(co 2010 Internet Systems Consortium, Inc. ("ISC")
+.br

@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+# OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+# $Id: freebsd-aftr-script 1001 2010-11-30 18:56:00Z pselkirk $
+
+aftr_start()
+{
+    set -x
+
+    ifconfig tun0 inet 192.0.0.1 192.0.0.2
+    route add 10.0.0.0/8 192.0.0.2
+    route add -inet6 2001::/64 -iface -ifp -link tun0
+}
+
+aftr_stop()
+{
+    set -x
+
+    ifconfig tun0 down
+    route del -inet6 2001::/64
+}
+
+case "$1" in
+start)
+	aftr_start
+	;;
+stop)
+	aftr_stop
+	;;
+*)
+	echo "Usage: $0 start|stop"
+	exit 1
+	;;
+esac
+
+exit 0

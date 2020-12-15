@@ -1,0 +1,77 @@
+Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+$Id: README.shareone 1001 2010-11-30 18:56:00Z pselkirk $
+
+This file is about a specific but not uncommon case where the AFTR box
+gets only one public address:
+ - this address is used for standard services of the box
+ - this address is used by application proxies & co, in particular
+  the DNS caching server
+ - this address is used to NAT traffic, i.e., for the AFTR function
+The address can be dynamic (but must not change during an AFTR process
+run, in general this assumption is compatible with DHCP. If not the
+NAT part of the AFTR script must be clear and setup again).
+
+The AFTR box is configured to use the eth0 interface on the WAN side,
+the eth1 on the LAN side. The AFTR process itself is configured as
+usual, it uses a pseudo-public address (i.e., an address which is not
+recognized as private but in fact is a reserved public address, the
+first to avoid confusion, the second to avoid a collision with a real
+public address).
+Netfilter/iptables is used to map the pseudo-public address to the shared
+public address. Port forwarding is a bit more complex, the port range
+used for port forwarding must be port-forwarded (destination natted in
+netfilter/iptables terms) as it (i.e., not changing ports) to the
+pseudo-public address.
+Of course there is nothing which can be done for no-NATs or for
+A+P/PRR as the first router/NAT of the Internet connection has no
+reason to support it.
+
+For the AFTR box itself configuration should be:
+ - use the standard for eth0 (i.e., plain DHCP)
+ - use the standard setup for the AFTR function, only the script needs
+  to be special
+ - IPv4 forwarding must be enabled
+ - don't forget to flush iptables and ip6tables
+Adapt if needed the aftr-shareone.conf / aftr-shareone-script examples.
+(they use 198.18.200.111 as the pseudo-public address and 60000-65535
+tcp and udp port ranges for port forwarding).
+If the kernel supports it (cf. iptables SNAT section) it can be useful
+to add "--random" to the SNAT rule in order to get back port randomization.
+
+For netfilter/iptables wizards only:
+ - $PUBLIC is the shared real public address, it is taken from the eth0
+  configuration.
+ - the flush in stop and at the beginning of start is for cleaning NAT rules.
+ - the SNAT rule just creates a new conntrack NAT entry for the first
+  packet of a flow to the Internet coming from the AFTR. It adds no
+  constraint on the protocol or the natted source port (but the AFTR
+  has itself such constraints, protocols are tcp/udp/icmp-echo and
+  the source port will be in the range declared in the pool so
+  the natted port should be in one of the ranges decribed in iptables
+  SNAT section).
+ - the first DNAT rule remaps traffic to a matching port to the pseudo
+  public address without changing the destination port. It is used for
+  port forwarding.
+ - destination ports are protocol specific so the rules have to be
+  duplicated from TCP to UDP.
+ - local traffic doesn't go through PREROUTING so the rules have to
+  be duplicated from PREROUTING to OUTPUT
+Don't forget than with conntrack a NAT entry matches the both ways so
+what matters is the processing of the first packet of a flow. Further
+packets are recognized by conntrack to belong to the same flow,
+including in the "reverse" way, and the NAT rule is applied (the
+symmetrical rule for reverse way packets). And conntrack is used too
+to recognize local traffic.

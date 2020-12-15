@@ -1,0 +1,25 @@
+Source: aftr
+Section: network
+Priority: optional
+Maintainer: tld1 <tld1@unknown>
+Build-Depends: debhelper (>= 11.0.0)
+Standards-Version: 3.9.4
+Homepage: https://www.isc.org/downloads/
+#Vcs-Git: git://git.debian.org/collab-maint/aftr.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/aftr.git;a=summary
+
+Package: aftr
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Address Family Transition Router
+ Address Family Transition Router (AFTR) is the latest product in ISC’s 
+ family of open source Internet infrastructure products.  Developed in 
+ concert with Comcast, AFTR 1.0 is intended to ease the transition from 
+ IPv4 to IPv6 by allowing legacy IPv4 end sites such as home PCs to 
+ interact with IPv4 content providers and services over an IPv6 carrier 
+ infrastructure. As with ISC’s other products, as the Dual Stack Lite 
+ protocol evolves, AFTR will strive to remain an up to date reference 
+ implementation as well as a robust enterprise grade router technology. 
+ Our ability to maintain AFTR and be actively involved in furthering 
+ core Internet protocols is directly dependent on community subsidy 
+ and participation.

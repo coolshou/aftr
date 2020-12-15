@@ -1,0 +1,64 @@
+Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+$Id: README.natcntl 589 2010-01-15 05:00:12Z pselkirk $
+
+About NAT control protocols:
+
+UPnP IGD 1.0:
+ - ExternalIPAddress stuff can be mapped to (extended) NAT-PMP
+ - no interface to get PortMappingEntry
+ - can't negociate ExternalPort
+ - issue with 0 PortMappingLeaseDuration, proposal to reset it to one day
+ - PortMappingDescription is useless?
+
+NAT-PMP (draft-cheshire-nat-pmp.txt):
+ - multicast stuff makes sense only on the LAN (on relay reboot?)
+ - need a specific transport, proposal: shim transport, first byte
+  shim (total) length (note: always != 0), last 4 bytes: real client IPv4
+  address. Optionally align the shim on 4 byte boundary.
+ - traffic between the relay and a server on the AFTR box, proposal: reuse
+  the DNS server IPv6 address from DHCP.
+ - per relay seconds since start of epoch.
+ - companion port reservation on the real client IPv4 address.
+ - external port extension: opcodes 3 and 4, new error 6.
+ - TCP reset and ICMP port unreachable impossible to implement in user mode.
+
+extended NAT-PMP / AFTR interface:
+ - external address mapped to AFTR try tunnel (initially)
+ - create mapping mapped to AFTR try nat
+ - destroy mapping mapped to AFTR delete nat (no acknowledged)
+ - reset client state (and SSSOE) on AFTR tunnel del notification
+
+Tools:
+ - trivial relay for NAT-PMP: trpmp.c (OpenWRT package)
+ - extended NAT-PMP server: xpmpd.py
+
+OpenWRT package for trpmp:
+ - if not using OpenWRT package system, the source is trpmp/files/trpmp.c
+ - if using OpenWRT package system, to build the .ipk file:
+  * copy or link the trpmp directory under the OpenWRT source package,
+   for instance with a copy of OpenWRT 8.09 "kamikaze" in ~/openwrt/work
+    mkdir ~/openwrt/work/package/aftr
+    ln -s `pwd`/trpmp ~/openwrt/work/package/aftr
+  * go to the OpenWRT sources/build directory (cd ~/openwrt/work here)
+  * run "make menuconfig" to enable the package (in the AFTR category,
+   not needed if all packages are enabled by default)
+  * build the package ("make" to build everything including the package,
+   "make package/trpmp/compile" for the package only)
+  * the result will be in bin/packages/mipsel/trpmp_1.01b1-1_mipsel.ipk
+ - everything for the package is in trpmp/Makefile
+
+Portproxy (http://klub.com.pl/portproxy/):
+ - last snapshot (2009-12-29) support the extended NAT-PMP protocol

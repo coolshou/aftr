@@ -1,0 +1,319 @@
+.\" Copyright (C) 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+.\" 
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+.\" REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+.\" AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+.\" INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+.\" LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+.\" OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id$
+.\"
+.hy 0
+.ad l
+'\" t
+.\"     Title: aftr.commands
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Jan 14, 2010
+.\"    Manual: AFTR
+.\"    Source: AFTR
+.\"  Language: English
+.\"
+.TH "AFTR\&.COMMANDS" "5" "Jan 14, 2010" "AFTR" "AFTR"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+aftr.command \- interactive commands for aftr
+.SH "SYNOPSIS"
+.HP 14
+\fBaftr\&.commands\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBaftr\fR
+daemon runs in the background\&. After it starts, it can be controlled interactively from a control channel (aka\&. a session)\&.
+.PP
+All of the reloadable configuration commands can be allowed to run from the command line, to add or change configuration\&. In addition, the following commands can be run interactively\&.
+.SH "INTERACTIVE COMMANDS"
+.PP
+\fBabort\fR
+.RS 4
+Call
+abort(3)
+to create a core file\&. Please try to use it only on forked processes\&.
+.RE
+.PP
+\fBecho \fR\fB\fIxxx\fR\fR
+.RS 4
+Echo the command\&. This can be used for an external tool to synchronize with the AFTR daemon\&.
+.RE
+.PP
+\fBfork\fR
+.RS 4
+Fork the
+\fBaftr\fR
+process\&. In the parent the current session is closed (so after this command you\'ll talk only to the child) and other activities, including packet forwarding, are continued\&. In the child all file descriptors at the exception of the current session are closed\&.
+.sp
+This command should be used before to execution an expensive and atomic operation like list commands or some debug commands, and of course the abort command\&.
+.RE
+.PP
+\fBhelp \fR\fB[all]\fR
+.RS 4
+List available or all commands\&.
+.RE
+.PP
+\fBkill\fR
+.RS 4
+Orderly kill the
+\fBaftr\fR
+process\&.
+.RE
+.PP
+\fBload \fR\fB\fIfile\fR\fR
+.RS 4
+Redirect the input of the current session from the content of the file\&. This is done in an atomic way (i\&.e\&., there is no other activity during the operation) but exists if a command fails\&.
+.RE
+.PP
+\fBquit\fR
+.RS 4
+Obsolete, use
+\fBsession close\fR
+(for closing the current session) or
+\fBkill\fR
+(for killing the process)\&.
+.RE
+.PP
+\fBreboot\fR
+.RS 4
+Reboot the whole process\&.
+.RE
+.PP
+\fBreload\fR
+.RS 4
+Reload the section two part of the config file\&. This is sliced with the packet forwarding, but not with session reading (so you can\'t execute a command until reload is finished)\&.
+.sp
+The reload process uses a generation system: static NAT, PRR/A+P and no\-NAT entries in the reloaded file are put in the next generation\&. If the reload succeeds, global entries in older generations are garbaged collected, if it fails new generation entries are backtracked to the previous generation\&. Garbage collection and backtracking are sliced with the packet forwarding, another reload command is forbidden until they finish so a reload flushes the input buffer of the current session\&.
+.RE
+.PP
+\fBshow dropped|stat\fR
+.RS 4
+Aliases of
+\fBdebug dropped\fR
+and
+\fBdebug stat\fR, display dropped packet and general statistics\&.
+.RE
+.SH "DEBUG COMMANDS"
+.PP
+\fBnoop\fR
+.RS 4
+Returns
+LOG: alive\&.
+.RE
+.PP
+\fBdebug check \fR\fB[nat|nonat|pool|session|tunnel]\fR
+.RS 4
+Performs some sanity checks on structures\&. Reserved to expert usage on a forked process (or better core file debugged with gdb)\&. Note it uses recusive deep structure walking so can eat a lot of stack\&.
+.RE
+.PP
+\fBdebug disable \fR\fB[clear]\fR
+.RS 4
+Disable per\-tunnel debug counters\&. Optionally clear them\&.
+.RE
+.PP
+\fBdebug dropped\fR
+.RS 4
+This displays the dropped packet statistics with reasons\&.
+.RE
+.PP
+\fBdebug enable \fR\fB\fIaddr\fR\fR
+.RS 4
+Enable per\-tunnel debug counters for the tunnel with
+\fIaddr\fR
+remote IPv6 address\&. Note the counters can be incremented only when the involved tunnel is known, for instance, only after reassembly\&.
+.RE
+.PP
+\fBdebug fragment IPv6|in|out\fR
+.RS 4
+This displays the list of IPv4 or IPv6 fragments awaiting reassembly\&.
+.RE
+.PP
+\fBdebug fragment \fR\fB\fIaddr\fR\fR
+.RS 4
+This displays information about a single fragment or fragment chain\&.
+\fIadd\fR> is the memory address of the fragment structure (from a previous
+\fBdebug fragment\fR
+command)\&.
+.RE
+.PP
+\fBdebug hash\fR
+.RS 4
+This displays some statistics about the various hash tables (fragment, nat, and tunnel)\&.
+.RE
+.PP
+\fBdebug nat\fR
+.RS 4
+This displays some information about the nat hash table and entry table\&.
+.RE
+.PP
+\fBdebug nat \fR\fB\fIaddr\fR\fR
+.RS 4
+This displays detailed information about a single nat binding\&.
+\fIaddr\fR
+is the memory address of the nat structure (from a previous
+\fBdebug nat\fR
+command)\&.
+.RE
+.PP
+\fBdebug nonat\fR
+.RS 4
+This displays the list of no\-nat tunnel entries\&.
+.RE
+.PP
+\fBdebug pool\fR
+.RS 4
+This displays the global IPv4 addresses that will be used for NAT mapping\&.
+.RE
+.PP
+\fBdebug session\fR
+.RS 4
+This displays the control channel session types with the number of active sessions\&.
+.RE
+.PP
+\fBdebug stat\fR
+.RS 4
+This displays some general statistics about packets in and out\&. If per\-tunnel debug counters are enable, displays them\&.
+.RE
+.PP
+\fBdebug tunnel\fR
+.RS 4
+This displays some information about the tunnel table\&.
+.RE
+.PP
+\fBdebug tunnel \fR\fB\fIIPv6_remote\fR\fR
+.RS 4
+This displays some information about a single tunnel\&.
+.RE
+.SH "DELETE COMMANDS"
+.PP
+\fBdelete acl6 \fR\fB\fIIPv6_address\fR\fR
+.RS 4
+This removes the IPv6 ACL entry with the IPv6 address\&.
+.RE
+.PP
+\fBdelete nat \fR\fB\fIIPv6_remote\fR\fR\fB tcp|udp \fR\fB\fIIPv4\fR\fR\fB \fR\fB\fIport\fR\fR
+.RS 4
+This removes a static or dynamic NAT binding\&.
+.RE
+.PP
+\fBdelete nonat \fR\fB\fIIPv6_remote\fR\fR
+.RS 4
+This removes a no\-nat tunnel entry\&.
+.RE
+.PP
+\fBdelete private \fR\fB\fIIPv4_address\fR\fR
+.RS 4
+Look at zone zero configuration commands\&.
+.RE
+.PP
+\fBdelete prr \fR\fB\fIIPv6_remote\fR\fR\fB tcp|udp \fR\fB\fIIPv4\fR\fR\fB \fR\fB\fIport\fR\fR
+.RS 4
+This removes a Port\-Range Router/A+P null NAT binding\&.
+.RE
+.PP
+\fBdelete tunnel \fR\fB\fIIPv6_remote\fR\fR
+.RS 4
+This removes a tunnel and all NAT bindings associated with it\&.
+.RE
+.SH "LIST COMMANDS"
+.PP
+\fBlist acl6\fR
+.RS 4
+List IPv6 ACLs\&.
+.RE
+.PP
+\fBlist default\fR
+.RS 4
+List all the default values which can be set by a \'default\'/\'global\' command\&.
+.RE
+.PP
+\fBlist nat \fR\fB[conf|static|prr|dynamic|all|global]\fR
+.RS 4
+List the NAT entries in the configuration file format\&. Default is to list only the configured (\'conf\') NAT entries\&. \'global\' lists the the configured global (i\&.e\&., not by a session) active (i\&.e\&., not to be garbaged collected after a reload) NAT entries\&.
+.RE
+.PP
+\fBlist nonat\fR
+.RS 4
+List all the No\-NAT tunnel entries in the configuration file format\&.
+.RE
+.PP
+\fBlist pool\fR
+.RS 4
+List the NATted source addresses with current port ranges in the configuration file format\&.
+.RE
+.PP
+\fBlist session \fR\fB[\fIname\fR|\fIgeneration\fR]\fR
+.RS 4
+List the static NAT, PRR/A+P and no\-NAT entries created by the current session or the session with
+\fIname\fR
+or with
+\fIgeneration\fR
+(note these entries will be flushed when the session will be closed so this command can be used to get them in order to include them in the config)\&.
+.RE
+.PP
+\fBlist tunnel\fR
+.RS 4
+List the tunnel entries in the configuration file format, including specific MTU (if different from the default MTU)\&.
+.RE
+.SH "SESSION COMMANDS"
+.PP
+These commands deal directly with sessions (aka\&. control channels)\&.
+.PP
+\fBsession close \fR\fB[\fIname\fR|\fIgeneration\fR]\fR
+.RS 4
+Close the current or designed session\&. Delete all the static NAT, PRR/A+P and no\-NAT entries created by the current session and which were not promoted to global/permanent entries by a reload\&.
+.RE
+.PP
+\fBsession config on|off\fR
+.RS 4
+Enable/disable the section two configuration commands\&. By default configuration commands must go to the config file\&.
+.RE
+.PP
+\fBsession log on|off\fR
+.RS 4
+Log errors or don\'t for the current session\&. Default is on\&.
+.RE
+.PP
+\fBsession name \fR\fB[\fIname\fR]\fR
+.RS 4
+Display or set the name of the current session\&. The stdio initial session is statically named \'tty\'\&.
+.RE
+.PP
+\fBsession notify on|off\fR
+.RS 4
+Log tunnel removal or don\'t to the current session\&. Default is off\&.
+.RE
+.SH "SEE ALSO"
+.PP
+\fBaftr\fR(8),
+\fBaftr.conf\fR(5)
+.SH "AUTHOR"
+.PP
+Internet Systems Consortium
+.SH "COPYRIGHT"
+.br
+Copyright \(co 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+.br

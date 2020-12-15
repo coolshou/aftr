@@ -1,0 +1,150 @@
+.\" Copyright (C) 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+.\" 
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+.\" REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+.\" AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+.\" INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+.\" LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+.\" OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id$
+.\"
+.hy 0
+.ad l
+'\" t
+.\"     Title: aftr
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Jan 14, 2010
+.\"    Manual: AFTR
+.\"    Source: AFTR
+.\"  Language: English
+.\"
+.TH "AFTR" "8" "Jan 14, 2010" "AFTR" "AFTR"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+aftr \- Address Family Transition Router
+.SH "SYNOPSIS"
+.HP 5
+\fBaftr\fR [\fB\-g\fR] [\fB\-t\fR] [\fB\-c\ \fR\fB\fIconfig\-file\fR\fR] [\fB\-d\ \fR\fB\fIdevice\-name\fR\fR] [\fB\-p\ \fR\fB\fIport\-number\fR\fR] [\fB\-s\ \fR\fB\fIscript\-file\fR\fR] [\fB\-u\ \fR\fB\fIsocket\-name\fR\fR]
+.SH "OPTIONS"
+.PP
+\-g
+.RS 4
+By default the aftr process becomes a daemon,
+\fB\-g\fR
+keeps it in foreground with logging to stderr\&.
+.RE
+.PP
+\-t
+.RS 4
+\fB\-t\fR
+can be used to check a configuration file\&.
+.RE
+.PP
+\-c \fIconfig\-file\fR
+.RS 4
+The
+\fBaftr\fR
+daemon requires a configuration file\&. By default it is named
+aftr\&.conf, and is located in
+\fI$src_path\fR\&. The
+\fIAFTRCONFIG\fR
+environment variable and the
+\fB\-c\fR
+argument give an alternate path\&. A sample configuration file is provided in
+$src_path/conf/aftr\&.conf
+(OS independent)\&.
+.RE
+.PP
+\-d \fIdevice\-name\fR
+.RS 4
+Linux: The aftr process opens
+/dev/net/tun
+and set the name of the interface to the
+\fIAFTRDEVICE\fR
+environment variable or the
+\fB\-d\fR
+command line argument value or by default \'tun0\'\&.
+.sp
+FreeBSD: The aftr process opens
+/dev/tunXXX
+from the
+\fIAFTRDEVICE\fR
+environment variable or the
+\fB\-d\fR
+command or by default
+/dev/tun0\&. The \'auto\' value uses the first free
+/dev/tunXXX
+device\&.
+.sp
+The tunnel interface/device specification can be a full path (/dev/\&.\&.\&.), a relative name or a number\&.
+.RE
+.PP
+\-p \fIport\-number\fR
+.RS 4
+Use the
+\fIport\-number\fR
+for TCP control channels\&. Default is 1015\&.
+.RE
+.PP
+\-s \fIscript\-file\fR
+.RS 4
+The
+\fBaftr\fR
+daemon executes a shell script file with
+\fBstart\fR
+on invocation\&. This is named by default
+aftr\-script
+and located in
+\fI$src_path\fR\&. The
+\fIAFTRSCRIPT\fR
+environment variable and the
+\fB\-s\fR
+argument give an alternate path\&. This file could be even empty, but must exist\&.
+.sp
+The
+\fBaftr\fR
+daemon will eventually execute the shell script file with the
+\fBstop\fR
+argument before it exits\&.
+.sp
+The
+conf
+directory provides examples (including the configuration files used in our testbeds)\&.
+aftr\-script\&.freebsd
+variant is for a FreeBSD based AFTR\&.
+.RE
+.PP
+\-u \fIsocket\-name\fR
+.RS 4
+As an alternative to TCP over IPv4 and IPv6 with localhost control channels, the
+\fBaftr\fR
+process can accept PF_UNIX stream socket control channel on the
+\fIsocket\-name\fR\&.
+.RE
+.SH "SEE ALSO"
+.PP
+\fBaftr.conf\fR(5),
+\fBaftr.commands\fR(5)
+.SH "AUTHOR"
+.PP
+Internet Systems Consortium
+.SH "COPYRIGHT"
+.br
+Copyright \(co 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+.br

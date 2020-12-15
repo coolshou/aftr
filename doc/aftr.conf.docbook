@@ -1,0 +1,589 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+              "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+              [<!ENTITY mdash "&#8212;">]>
+<!--
+ - Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<!-- File:  $Id: aftr.conf.docbook 1001 2010-11-30 18:56:00Z pselkirk $ -->
+<refentry>
+  <refentryinfo>
+     <date>Jan 14, 2010</date>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle><filename>aftr.conf</filename></refentrytitle>
+    <manvolnum>5</manvolnum>
+    <refmiscinfo>AFTR</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname><filename>aftr.conf</filename></refname>
+    <refpurpose>configuration file for aftr</refpurpose>
+  </refnamediv>
+
+  <docinfo>
+    <copyright>
+      <year>2009</year>
+      <year>2010</year>
+      <holder>Internet Systems Consortium, Inc. ("ISC")</holder>
+    </copyright>
+  </docinfo>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>aftr.conf</command>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>DESCRIPTION</title>
+    <para>
+      The <command>aftr</command> daemon requires a configuration file.
+      By default it is named <filename>aftr.conf</filename>, and is
+      located in <varname>$src_path</varname>.
+      The <varname>AFTRCONFIG</varname> environment
+      variable and the <option>-c</option> argument give an alternate path.
+      Sample configuration files are provided in
+      <filename>$src_path/conf/aftr.conf</filename> (OS independent).
+    </para>
+    <para>
+      The configuration file consists of a set of one-line configuration
+      commands.  Commands are not case sensitive.  Any line beginning with '#'
+      or whitespace is ignored as a comment.
+    </para>
+    <para>
+      Configuration and interactive commands belong to sections:
+      <itemizedlist>
+        <listitem>
+        <para>
+          section zero is for global parameters which must be defined before
+          anything else when they are not kept to their default values,
+          for instance <command>defmtu</command>.
+        </para>
+        </listitem>
+        <listitem>
+        <para>
+          section one is for required parameters, for instance
+          <command>acl6</command>.
+        </para>
+        </listitem>
+        <listitem>
+        <para>
+          section two is for reloadable parameters, for instance
+          <command>nat</command>.
+        </para>
+        </listitem>
+        <listitem>
+        <para>
+          interactive only commands are in the section three.
+        </para>
+        </listitem>
+      </itemizedlist>
+    </para>
+    <para>
+      Only the section one commands are required; reasonable defaults are
+      provided for all other configuration parameters.  See
+      <filename>conf/aftr.conf</filename> for an example of a minimal
+      configuration file.
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>GLOBAL CONFIGURATION COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>autotunnel on|off</command></term>
+        <listitem>
+        <para>
+          Alias of <userinput>default tunnel auto on|off</userinput>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>bucket tcp|udp|icmp size <replaceable>size</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the bucket size. Compile time options are
+          <varname>[TCP|UDP|ICMP]BUCKSZ</varname>,
+          default values are: <varname>TCPBUCKSZ</varname> 10,
+          <varname>UDPBUCKSZ</varname> 8, <varname>ICMPBUCKSZ</varname> 3.
+          Minimum is 0 (excluded) and maximum 255.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>decay 1|5|15 <replaceable>decay</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies decay values for 1, 5 and 15 mn rates. Compile time
+          options are <varname>DECAY{1,5,15}</varname>, default values are:
+          <varname>DECAY1</varname> exp(-1/60), <varname>DECAY5</varname>
+          exp(-1/300), <varname>DECAY15</varname> exp(-1/900).
+          Minimum is 0.0 and maximum 1.0.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default fragment equal on|off</command></term>
+        <listitem>
+        <para>
+          Enables or disables equalizing the length of IPv6 fragments.
+          Default is off.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default fragment lifetime <replaceable>lifetime</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the lifetime of fragments in reassembly queues. Compile
+          time option is <varname>FRAG_LIFETIME</varname>, default value is
+          30 seconds.
+          Minimum is 0 (excluded) and maximum 1200.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default fragment ipv6|in|out maxcount <replaceable>maxcount</replaceable></command></term>
+        <listitem>
+        <para>
+          Maximum number of entries in reassembly queues ('in' is IPv4 from
+          clients to the Internet, 'out' is IPv4 from the Internet to clients).
+          Compile time options are <varname>FRAG{6,IN,OUT}_MAXCNT</varname>,
+          default values are 1024. Minimum is 0 (included so it is possible to
+          disable reassembly), maximum is 16535.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default hold lifetime <replaceable>lifetime</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the lifetime of expired NAT entries in the hold queue.
+          Compile time option is <varname>HOLD_LIFETIME</varname>, default
+          value is 120 seconds. Minimum is 0 (included), maximum is 600.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default nat lifetime tcp|closed|udp|icmp|retrans <replaceable>lifetime</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the lifetime of dynamic NAT entries ('closed' is for closed
+          TCP sessions, 'retrans' is used for response not yet received).
+          Compile time options are
+          <varname>[TCP|CLOSED_TCP|UDP|ICMP|RETRANS]_LIFETIME</varname>,
+          default values are TCP (600), closed TCP (120, aka 2*MSL), UDP (300),
+          ICMP (30), retrans (10). Minimum is 0 (excluded), maximum 36000
+          (10 hours).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default pool tcp|udp|echo <replaceable>min</replaceable>-<replaceable>max</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the default port (or id for icmp echo) ranges for pools.
+          Compile time options are <varname>[TCP|UDP]_[MIN|MAX]PORT</varname>,
+          <varname>ICMP_[MIN|MAX]ID</varname>, default values are
+          <varname>TCP_MINPORT</varname> 2048, <varname>UDP_MINPORT</varname>
+          512, <varname>ICMP_MINID</varname> 0, <varname>TCP_MAXPORT</varname>
+          65535, <varname>UDP_MAXPORT</varname> 65535,
+          <varname>ICMP_MAXID</varname> 65535.
+          Minimum is 1 (0 for ICMP), maximum 63535. 
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default private <replaceable>IPv4_prefix</replaceable>/<replaceable>prefix_length</replaceable></command></term>
+        <listitem>
+        <para>
+	  Add a private prefix to IPv4 ACLs. The default is RFC 1918 prefixes
+	  and the 192.0.0.0/29 from the ds-lite draft.
+         </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel auto on|off</command></term>
+        <listitem>
+        <para>
+          Enables or disables on-the-fly tunnel creation.  Default is on.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel mss on|off</command></term>
+        <listitem>
+        <para>
+          This enables or disables TCP MSS patching on packets going from and
+          to tunnels.  Can be overridden by per-tunnel configuration.  If any
+          tunnels are explicitly configured, this must be specified before
+          them.  Default is off.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel mtu <replaceable>mtu</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies <replaceable>mtu</replaceable> as the default IPv6 MTU of
+          tunnels. Can be overridden by per-tunnel configuration.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel toobig on|off|strict</command></term>
+        <listitem>
+        <para>
+          This specifies the policy for packets from the Internet
+          which are too big (i.e., they don't fit in one IPv6
+          encapsulating packet) and are marked as <quote>don't
+          fragment</quote>. 'On' means a ICMPv4 packet too big error
+          is returned to the source, 'off' the packet just go through,
+          and 'strict' the packet is dropped with a ICMPv4
+          error. Default is on (i.e., the packet is encapsulated into
+          some IPv6 fragments and a ICMP error is returned for path
+          MTU determination).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel fragment ipv6|ipv4 maxcount <replaceable>maxcount</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the maximum number of reassembly queue entries per tunnel.
+          Compile time options are <varname>FRAGTN[46]_MAXCNT</varname>,
+          default values are  <varname>FRAGTN6_MAXCNT</varname> 16,
+          <varname>FRAGTN4_MAXCNT</varname> 64. Mininum is 0 (included for
+          reassembly disable), maximum is 255.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel nat tcp|udp|icmp maxcount <replaceable>maxcount</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the maximum number of NAT entries per tunnel. Compile time
+          options are <varname>[TCP|UDP|ICMP]_MAXTNATCNT</varname>, default
+          values are <varname>TCP_MAXNATCNT</varname> 2000,
+          <varname>UDP_MAXNATCNT</varname> 200,
+          <varname>ICMP_MAXNATCNT</varname> 50.
+          Minimum is 0 (included), maximum is 65535.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>default tunnel nat tcp|udp|icmp rate <replaceable>limit</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the maximum rate of dynamic NAT creation per second.
+          Compile time options are <varname>[TCP|UDP|ICMP]_MAXTNATRT</varname>,
+          default values are <varname>TCP_MAXNATRT</varname> 50,
+          <varname>UDP_MAXNATRT</varname> 20,
+          <varname>ICMP_MAXNATRT</varname> 5.
+          Minimum is 0 (included), maximum 255.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>delete private<replaceable>IPv4_address</replaceable></command></term>
+        <listitem>
+        <para>
+          This removes the IPv4 private prefix with the IPv4 address.
+	  It is an error to have no private prefixes.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>defmss on|off</command></term>
+        <listitem>
+        <para>
+          Alias of <userinput>default tunnel mss on|off</userinput>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>defmtu <replaceable>mtu</replaceable></command></term>
+        <listitem>
+        <para>
+          Alias of <userinput>default tunnel mtu
+            <replaceable>mtu</replaceable></userinput>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>deftoobig on|off|strict</command></term>
+        <listitem>
+        <para>
+          Alias of <userinput>default tunnel toobig on|off|strict</userinput>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>eqfrag on|off</command></term>
+        <listitem>
+        <para>
+          Alias of <userinput>default fragment equal on|off</userinput>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>quantum <replaceable>quantum</replaceable></command></term>
+        <listitem>
+        <para>
+          Specifies the number of packets dealt with in one main loop round
+          (i.e., the size of a slice of work). Compile time option is
+          <varname>QUANTUM</varname>, default value is 20. Minimum is
+          2 (included), maximum is 255.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>REQUIRED CONFIGURATION COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>address endpoint <replaceable>IPv6_address</replaceable></command></term>
+        <listitem>
+        <para>
+          <replaceable>IPv6_address</replaceable> is the AFTR endpoint
+          address of the Softwire tunnels.
+          If the DHCPv6 ds-lite option is used, this address must match the
+          advertised address.
+        </para>
+        <para>
+          It is a required command: it  absolutely must be present in the
+          <filename>aftr.conf</filename> file; the <command>aftr</command>
+          daemon will not start without it.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>address icmp <replaceable>IPv4_address</replaceable></command></term>
+        <listitem>
+        <para>
+          <replaceable>IPv4_address</replaceable> is a global IPv4 address
+          used as the source for ICMP errors sent back to the Internet (i.e.,
+          the ICMPv4 errors will look like returned from an intermediate
+          router that has this address). It is a required command.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>pool <replaceable>IPv4_address</replaceable> <optional>tcp|udp|echo <replaceable>min</replaceable>-<replaceable>max</replaceable></optional></command></term>
+        <listitem>
+        <para>
+          This specifies a global IPv4 address that will be used as the source
+          address of NAT'ed packets sent to the Internet.  Multiple global
+          addresses can be specified, at least one is required.
+        </para>
+        <para>
+          The optional part limits the port (or id) range used for the protocol
+          with the global IPv4 address in dynamical bindings (i.e., not static
+          or A+P bindings which can use the reserved ports outside the range).
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>acl6 <replaceable>IPv6_prefix</replaceable>/<replaceable>prefix_length</replaceable></command></term>
+        <listitem>
+        <para>
+          This adds an (accept) entry in the IPv6 ACL. Note for a regular
+          IPv6 packet the ACL is checked only when no tunnel was found,
+          and the default is <quote>deny all</quote>, so at least one acl6
+          entry in the configuration file is required.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>RELOADABLE CONFIGURATION COMMANDS</title>
+    <variablelist>
+      <varlistentry>
+        <term><command>tunnel <replaceable>IPv6_remote</replaceable> <optional><replaceable>IPv4_src</replaceable></optional></command></term>
+        <listitem>
+        <para>
+          This specifies an IPv4-in-IPv6 tunnel configuration.
+          <replaceable>IPv6_remote</replaceable> is the remote (ds-lite
+          client) IPv6 address of the tunnel. Either the tunnel is associated
+          with a source address in a round robin way or it is associated to
+          the specified <replaceable>IPv4_src</replaceable>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>nat <replaceable>IPv6_remote</replaceable> tcp|udp <replaceable>IPv4_src</replaceable> <replaceable>port_src</replaceable> <replaceable>IPv4_new</replaceable> <replaceable>port_new</replaceable></command></term>
+        <listitem>
+        <para>
+          This defines a static binding/NAT entry for the client
+          behind the tunnel at <replaceable>IPv6_remote</replaceable>.
+          <replaceable>*_src</replaceable> are the source IPv4 address
+          and port at the tunnel side of the NAT,
+          <replaceable>*_new</replaceable> are the source IPv4 address
+          and port at the Internet side of the NAT.
+          <replaceable>IPv4_new</replaceable> should be a reserved source
+          NAT address, <replaceable>port_new</replaceable> must not be inside
+          a dynamic port range.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>prr <replaceable>IPv6_remote</replaceable> tcp|udp <replaceable>IPv4</replaceable> <replaceable>port</replaceable></command></term>
+        <listitem>
+        <para>
+          This defines a Port-Range Router/A+P null NAT entry for the
+          client behind the tunnel at <replaceable>IPv6_remote</replaceable>.
+          <replaceable>IPv4</replaceable> and <replaceable>port</replaceable>
+          are the source IPv4 address and  port at the tunnel side of the NAT.
+          They stay unchanged both ways: this entry is used to check
+          authorization and perform port routing.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>nonat <replaceable>IPv6_remote</replaceable> <replaceable>IPv4</replaceable>/<replaceable>prefix_length</replaceable></command></term>
+        <listitem>
+        <para>
+          This defines a No-NAT tunnel for the client behind the tunnel at
+          <replaceable>IPv6_remote</replaceable> and the prefix
+          <replaceable>IPv4</replaceable>/<replaceable>prefix_length</replaceable>.
+          No translation is performed for matching packets.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>mss <replaceable>IPv6_remote</replaceable> on|off</command></term>
+        <listitem>
+        <para>
+          This enables or disables TCP MSS patching on packets going
+          from and to the tunnel of <replaceable>IPv6_remote</replaceable>.
+          Default is off.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>mtu <replaceable>IPv6_remote</replaceable> <replaceable>mtu</replaceable></command></term>
+        <listitem>
+        <para>
+          This changes the IPv6 MTU of the tunnel of
+          <replaceable>IPv6_remote</replaceable> to
+          <replaceable>mtu</replaceable>.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>toobig <replaceable>IPv6_remote</replaceable> on|off|strict</command></term>
+        <listitem>
+        <para>
+          Per-tunnel configuration of the too big policy.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>debug set <optional><replaceable>level</replaceable></optional></command></term>
+        <listitem>
+        <para>
+          Specifies the debug level.  Default is 0.  If set to non 0,
+          verbose log messages will be dumped to stderr.  The higher the level
+          is, the noiser the logs are.  At present, the meaningful levels are
+          1 (log tunnel creation), 3 (log packet reads and writes), and 10
+          (function entry tracing).  If the level is omitted, it is set to 1.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>try tunnel <replaceable>IPv6_remote</replaceable> <optional><replaceable>IPv4_src</replaceable></optional></command></term>
+        <listitem>
+        <para>
+	  Create when it doesn't already exist an IPv4-in-IPv6 tunnel,
+          returns in all cases the description of the tunnel entry. This
+          command should be used by tools managing temporary port forwarding.
+	  <replaceable>IPv6_remote</replaceable> must be acceptable for IPv6
+	  ACLs.
+        </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term><command>try nat <replaceable>IPv6_remote</replaceable> tcp|udp <replaceable>IPv4_src</replaceable> <replaceable>port_src</replaceable> <replaceable>IPv4_new</replaceable> <replaceable>port_new</replaceable></command></term>
+        <listitem>
+        <para>
+          Create when it doesn't already exist a static binding/NAT
+          entry. This command should be used by tools managing
+          temporary port forwarding. The tunnel must exist.
+        </para>
+        </listitem>
+      </varlistentry>
+    </variablelist>
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+    <citerefentry>
+      <refentrytitle>aftr</refentrytitle>
+      <manvolnum>8</manvolnum>
+    </citerefentry>,
+    <citerefentry>
+      <refentrytitle>aftr.commands</refentrytitle>
+      <manvolnum>5</manvolnum>
+    </citerefentry>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+    <para><corpauthor>Internet Systems Consortium</corpauthor></para>
+  </refsect1>
+
+</refentry>

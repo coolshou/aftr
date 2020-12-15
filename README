@@ -1,0 +1,44 @@
+Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+$Id: README 1001 2010-11-30 18:56:00Z pselkirk $
+
+
+1. INTRODUCTION
+
+   ISC AFTR implements a Dual-Stack Lite (DS-Lite) Address Family
+   Transition Router (AFTR), as described in
+   draft-ietf-softwire-dual-stack-lite-06.txt. This technology allows
+   end-users with IPv4-only hosts or IPv4-only applications to
+   communicate with IPv4 peers over an IPv6-only network.
+
+1.1 Documentation
+
+   book.pdf, book.txt - Primary user documentation.  This includes
+   instructions for building, configuring, launching, and managing
+   the AFTR daemon.
+
+   man/ - man pages for configuring, launching, and controlling the
+   AFTR daemon.
+
+   html/ - HTML versions of the book and man pages.
+
+   doc/ - Documentation sources, for those who like to play with such
+   things.
+
+   conf/ - Example configuration files for B4 and AFTR.
+
+2. BUG REPORTS
+
+   Bug reports should be sent to: aftr-bugs@isc.org

@@ -1,0 +1,409 @@
+.\" Copyright (C) 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+.\" 
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+.\" REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+.\" AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+.\" INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+.\" LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+.\" OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+.\" PERFORMANCE OF THIS SOFTWARE.
+.\"
+.\" $Id$
+.\"
+.hy 0
+.ad l
+'\" t
+.\"     Title: aftr.conf
+.\"    Author: [see the "AUTHOR" section]
+.\" Generator: DocBook XSL Stylesheets v1.75.2 <http://docbook.sf.net/>
+.\"      Date: Jan 14, 2010
+.\"    Manual: AFTR
+.\"    Source: AFTR
+.\"  Language: English
+.\"
+.TH "AFTR\&.CONF" "5" "Jan 14, 2010" "AFTR" "AFTR"
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+aftr.conf \- configuration file for aftr
+.SH "SYNOPSIS"
+.HP 10
+\fBaftr\&.conf\fR
+.SH "DESCRIPTION"
+.PP
+The
+\fBaftr\fR
+daemon requires a configuration file\&. By default it is named
+aftr\&.conf, and is located in
+\fI$src_path\fR\&. The
+\fIAFTRCONFIG\fR
+environment variable and the
+\fB\-c\fR
+argument give an alternate path\&. Sample configuration files are provided in
+$src_path/conf/aftr\&.conf
+(OS independent)\&.
+.PP
+The configuration file consists of a set of one\-line configuration commands\&. Commands are not case sensitive\&. Any line beginning with \'#\' or whitespace is ignored as a comment\&.
+.PP
+Configuration and interactive commands belong to sections:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+section zero is for global parameters which must be defined before anything else when they are not kept to their default values, for instance
+\fBdefmtu\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+section one is for required parameters, for instance
+\fBacl6\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+section two is for reloadable parameters, for instance
+\fBnat\fR\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+interactive only commands are in the section three\&.
+.RE
+.sp
+.RE
+.PP
+Only the section one commands are required; reasonable defaults are provided for all other configuration parameters\&. See
+conf/aftr\&.conf
+for an example of a minimal configuration file\&.
+.SH "GLOBAL CONFIGURATION COMMANDS"
+.PP
+\fBautotunnel on|off\fR
+.RS 4
+Alias of
+\fBdefault tunnel auto on|off\fR\&.
+.RE
+.PP
+\fBbucket tcp|udp|icmp size \fR\fB\fIsize\fR\fR
+.RS 4
+Specifies the bucket size\&. Compile time options are
+\fI[TCP|UDP|ICMP]BUCKSZ\fR, default values are:
+\fITCPBUCKSZ\fR
+10,
+\fIUDPBUCKSZ\fR
+8,
+\fIICMPBUCKSZ\fR
+3\&. Minimum is 0 (excluded) and maximum 255\&.
+.RE
+.PP
+\fBdecay 1|5|15 \fR\fB\fIdecay\fR\fR
+.RS 4
+Specifies decay values for 1, 5 and 15 mn rates\&. Compile time options are
+\fIDECAY{1,5,15}\fR, default values are:
+\fIDECAY1\fR
+exp(\-1/60),
+\fIDECAY5\fR
+exp(\-1/300),
+\fIDECAY15\fR
+exp(\-1/900)\&. Minimum is 0\&.0 and maximum 1\&.0\&.
+.RE
+.PP
+\fBdefault fragment equal on|off\fR
+.RS 4
+Enables or disables equalizing the length of IPv6 fragments\&. Default is off\&.
+.RE
+.PP
+\fBdefault fragment lifetime \fR\fB\fIlifetime\fR\fR
+.RS 4
+Specifies the lifetime of fragments in reassembly queues\&. Compile time option is
+\fIFRAG_LIFETIME\fR, default value is 30 seconds\&. Minimum is 0 (excluded) and maximum 1200\&.
+.RE
+.PP
+\fBdefault fragment ipv6|in|out maxcount \fR\fB\fImaxcount\fR\fR
+.RS 4
+Maximum number of entries in reassembly queues (\'in\' is IPv4 from clients to the Internet, \'out\' is IPv4 from the Internet to clients)\&. Compile time options are
+\fIFRAG{6,IN,OUT}_MAXCNT\fR, default values are 1024\&. Minimum is 0 (included so it is possible to disable reassembly), maximum is 16535\&.
+.RE
+.PP
+\fBdefault hold lifetime \fR\fB\fIlifetime\fR\fR
+.RS 4
+Specifies the lifetime of expired NAT entries in the hold queue\&. Compile time option is
+\fIHOLD_LIFETIME\fR, default value is 120 seconds\&. Minimum is 0 (included), maximum is 600\&.
+.RE
+.PP
+\fBdefault nat lifetime tcp|closed|udp|icmp|retrans \fR\fB\fIlifetime\fR\fR
+.RS 4
+Specifies the lifetime of dynamic NAT entries (\'closed\' is for closed TCP sessions, \'retrans\' is used for response not yet received)\&. Compile time options are
+\fI[TCP|CLOSED_TCP|UDP|ICMP|RETRANS]_LIFETIME\fR, default values are TCP (600), closed TCP (120, aka 2*MSL), UDP (300), ICMP (30), retrans (10)\&. Minimum is 0 (excluded), maximum 36000 (10 hours)\&.
+.RE
+.PP
+\fBdefault pool tcp|udp|echo \fR\fB\fImin\fR\fR\fB\-\fR\fB\fImax\fR\fR
+.RS 4
+Specifies the default port (or id for icmp echo) ranges for pools\&. Compile time options are
+\fI[TCP|UDP]_[MIN|MAX]PORT\fR,
+\fIICMP_[MIN|MAX]ID\fR, default values are
+\fITCP_MINPORT\fR
+2048,
+\fIUDP_MINPORT\fR
+512,
+\fIICMP_MINID\fR
+0,
+\fITCP_MAXPORT\fR
+65535,
+\fIUDP_MAXPORT\fR
+65535,
+\fIICMP_MAXID\fR
+65535\&. Minimum is 1 (0 for ICMP), maximum 63535\&.
+.RE
+.PP
+\fBdefault private \fR\fB\fIIPv4_prefix\fR\fR\fB/\fR\fB\fIprefix_length\fR\fR
+.RS 4
+Add a private prefix to IPv4 ACLs\&. The default is RFC 1918 prefixes and the 192\&.0\&.0\&.0/29 from the ds\-lite draft\&.
+.RE
+.PP
+\fBdefault tunnel auto on|off\fR
+.RS 4
+Enables or disables on\-the\-fly tunnel creation\&. Default is on\&.
+.RE
+.PP
+\fBdefault tunnel mss on|off\fR
+.RS 4
+This enables or disables TCP MSS patching on packets going from and to tunnels\&. Can be overridden by per\-tunnel configuration\&. If any tunnels are explicitly configured, this must be specified before them\&. Default is off\&.
+.RE
+.PP
+\fBdefault tunnel mtu \fR\fB\fImtu\fR\fR
+.RS 4
+Specifies
+\fImtu\fR
+as the default IPv6 MTU of tunnels\&. Can be overridden by per\-tunnel configuration\&.
+.RE
+.PP
+\fBdefault tunnel toobig on|off|strict\fR
+.RS 4
+This specifies the policy for packets from the Internet which are too big (i\&.e\&., they don\'t fit in one IPv6 encapsulating packet) and are marked as
+\(lqdon\'t fragment\(rq\&. \'On\' means a ICMPv4 packet too big error is returned to the source, \'off\' the packet just go through, and \'strict\' the packet is dropped with a ICMPv4 error\&. Default is on (i\&.e\&., the packet is encapsulated into some IPv6 fragments and a ICMP error is returned for path MTU determination)\&.
+.RE
+.PP
+\fBdefault tunnel fragment ipv6|ipv4 maxcount \fR\fB\fImaxcount\fR\fR
+.RS 4
+Specifies the maximum number of reassembly queue entries per tunnel\&. Compile time options are
+\fIFRAGTN[46]_MAXCNT\fR, default values are
+\fIFRAGTN6_MAXCNT\fR
+16,
+\fIFRAGTN4_MAXCNT\fR
+64\&. Mininum is 0 (included for reassembly disable), maximum is 255\&.
+.RE
+.PP
+\fBdefault tunnel nat tcp|udp|icmp maxcount \fR\fB\fImaxcount\fR\fR
+.RS 4
+Specifies the maximum number of NAT entries per tunnel\&. Compile time options are
+\fI[TCP|UDP|ICMP]_MAXTNATCNT\fR, default values are
+\fITCP_MAXNATCNT\fR
+2000,
+\fIUDP_MAXNATCNT\fR
+200,
+\fIICMP_MAXNATCNT\fR
+50\&. Minimum is 0 (included), maximum is 65535\&.
+.RE
+.PP
+\fBdefault tunnel nat tcp|udp|icmp rate \fR\fB\fIlimit\fR\fR
+.RS 4
+Specifies the maximum rate of dynamic NAT creation per second\&. Compile time options are
+\fI[TCP|UDP|ICMP]_MAXTNATRT\fR, default values are
+\fITCP_MAXNATRT\fR
+50,
+\fIUDP_MAXNATRT\fR
+20,
+\fIICMP_MAXNATRT\fR
+5\&. Minimum is 0 (included), maximum 255\&.
+.RE
+.PP
+\fBdelete private\fR\fB\fIIPv4_address\fR\fR
+.RS 4
+This removes the IPv4 private prefix with the IPv4 address\&. It is an error to have no private prefixes\&.
+.RE
+.PP
+\fBdefmss on|off\fR
+.RS 4
+Alias of
+\fBdefault tunnel mss on|off\fR\&.
+.RE
+.PP
+\fBdefmtu \fR\fB\fImtu\fR\fR
+.RS 4
+Alias of
+\fBdefault tunnel mtu \fR\fB\fImtu\fR\fR\&.
+.RE
+.PP
+\fBdeftoobig on|off|strict\fR
+.RS 4
+Alias of
+\fBdefault tunnel toobig on|off|strict\fR\&.
+.RE
+.PP
+\fBeqfrag on|off\fR
+.RS 4
+Alias of
+\fBdefault fragment equal on|off\fR\&.
+.RE
+.PP
+\fBquantum \fR\fB\fIquantum\fR\fR
+.RS 4
+Specifies the number of packets dealt with in one main loop round (i\&.e\&., the size of a slice of work)\&. Compile time option is
+\fIQUANTUM\fR, default value is 20\&. Minimum is 2 (included), maximum is 255\&.
+.RE
+.SH "REQUIRED CONFIGURATION COMMANDS"
+.PP
+\fBaddress endpoint \fR\fB\fIIPv6_address\fR\fR
+.RS 4
+\fIIPv6_address\fR
+is the AFTR endpoint address of the Softwire tunnels\&. If the DHCPv6 ds\-lite option is used, this address must match the advertised address\&.
+.sp
+It is a required command: it absolutely must be present in the
+aftr\&.conf
+file; the
+\fBaftr\fR
+daemon will not start without it\&.
+.RE
+.PP
+\fBaddress icmp \fR\fB\fIIPv4_address\fR\fR
+.RS 4
+\fIIPv4_address\fR
+is a global IPv4 address used as the source for ICMP errors sent back to the Internet (i\&.e\&., the ICMPv4 errors will look like returned from an intermediate router that has this address)\&. It is a required command\&.
+.RE
+.PP
+\fBpool \fR\fB\fIIPv4_address\fR\fR\fB \fR\fB[tcp|udp|echo \fImin\fR\-\fImax\fR]\fR
+.RS 4
+This specifies a global IPv4 address that will be used as the source address of NAT\'ed packets sent to the Internet\&. Multiple global addresses can be specified, at least one is required\&.
+.sp
+The optional part limits the port (or id) range used for the protocol with the global IPv4 address in dynamical bindings (i\&.e\&., not static or A+P bindings which can use the reserved ports outside the range)\&.
+.RE
+.PP
+\fBacl6 \fR\fB\fIIPv6_prefix\fR\fR\fB/\fR\fB\fIprefix_length\fR\fR
+.RS 4
+This adds an (accept) entry in the IPv6 ACL\&. Note for a regular IPv6 packet the ACL is checked only when no tunnel was found, and the default is
+\(lqdeny all\(rq, so at least one acl6 entry in the configuration file is required\&.
+.RE
+.SH "RELOADABLE CONFIGURATION COMMANDS"
+.PP
+\fBtunnel \fR\fB\fIIPv6_remote\fR\fR\fB \fR\fB[\fIIPv4_src\fR]\fR
+.RS 4
+This specifies an IPv4\-in\-IPv6 tunnel configuration\&.
+\fIIPv6_remote\fR
+is the remote (ds\-lite client) IPv6 address of the tunnel\&. Either the tunnel is associated with a source address in a round robin way or it is associated to the specified
+\fIIPv4_src\fR\&.
+.RE
+.PP
+\fBnat \fR\fB\fIIPv6_remote\fR\fR\fB tcp|udp \fR\fB\fIIPv4_src\fR\fR\fB \fR\fB\fIport_src\fR\fR\fB \fR\fB\fIIPv4_new\fR\fR\fB \fR\fB\fIport_new\fR\fR
+.RS 4
+This defines a static binding/NAT entry for the client behind the tunnel at
+\fIIPv6_remote\fR\&.
+\fI*_src\fR
+are the source IPv4 address and port at the tunnel side of the NAT,
+\fI*_new\fR
+are the source IPv4 address and port at the Internet side of the NAT\&.
+\fIIPv4_new\fR
+should be a reserved source NAT address,
+\fIport_new\fR
+must not be inside a dynamic port range\&.
+.RE
+.PP
+\fBprr \fR\fB\fIIPv6_remote\fR\fR\fB tcp|udp \fR\fB\fIIPv4\fR\fR\fB \fR\fB\fIport\fR\fR
+.RS 4
+This defines a Port\-Range Router/A+P null NAT entry for the client behind the tunnel at
+\fIIPv6_remote\fR\&.
+\fIIPv4\fR
+and
+\fIport\fR
+are the source IPv4 address and port at the tunnel side of the NAT\&. They stay unchanged both ways: this entry is used to check authorization and perform port routing\&.
+.RE
+.PP
+\fBnonat \fR\fB\fIIPv6_remote\fR\fR\fB \fR\fB\fIIPv4\fR\fR\fB/\fR\fB\fIprefix_length\fR\fR
+.RS 4
+This defines a No\-NAT tunnel for the client behind the tunnel at
+\fIIPv6_remote\fR
+and the prefix
+\fIIPv4\fR/\fIprefix_length\fR\&. No translation is performed for matching packets\&.
+.RE
+.PP
+\fBmss \fR\fB\fIIPv6_remote\fR\fR\fB on|off\fR
+.RS 4
+This enables or disables TCP MSS patching on packets going from and to the tunnel of
+\fIIPv6_remote\fR\&. Default is off\&.
+.RE
+.PP
+\fBmtu \fR\fB\fIIPv6_remote\fR\fR\fB \fR\fB\fImtu\fR\fR
+.RS 4
+This changes the IPv6 MTU of the tunnel of
+\fIIPv6_remote\fR
+to
+\fImtu\fR\&.
+.RE
+.PP
+\fBtoobig \fR\fB\fIIPv6_remote\fR\fR\fB on|off|strict\fR
+.RS 4
+Per\-tunnel configuration of the too big policy\&.
+.RE
+.PP
+\fBdebug set \fR\fB[\fIlevel\fR]\fR
+.RS 4
+Specifies the debug level\&. Default is 0\&. If set to non 0, verbose log messages will be dumped to stderr\&. The higher the level is, the noiser the logs are\&. At present, the meaningful levels are 1 (log tunnel creation), 3 (log packet reads and writes), and 10 (function entry tracing)\&. If the level is omitted, it is set to 1\&.
+.RE
+.PP
+\fBtry tunnel \fR\fB\fIIPv6_remote\fR\fR\fB \fR\fB[\fIIPv4_src\fR]\fR
+.RS 4
+Create when it doesn\'t already exist an IPv4\-in\-IPv6 tunnel, returns in all cases the description of the tunnel entry\&. This command should be used by tools managing temporary port forwarding\&.
+\fIIPv6_remote\fR
+must be acceptable for IPv6 ACLs\&.
+.RE
+.PP
+\fBtry nat \fR\fB\fIIPv6_remote\fR\fR\fB tcp|udp \fR\fB\fIIPv4_src\fR\fR\fB \fR\fB\fIport_src\fR\fR\fB \fR\fB\fIIPv4_new\fR\fR\fB \fR\fB\fIport_new\fR\fR
+.RS 4
+Create when it doesn\'t already exist a static binding/NAT entry\&. This command should be used by tools managing temporary port forwarding\&. The tunnel must exist\&.
+.RE
+.SH "SEE ALSO"
+.PP
+\fBaftr\fR(8),
+\fBaftr.commands\fR(5)
+.SH "AUTHOR"
+.PP
+Internet Systems Consortium
+.SH "COPYRIGHT"
+.br
+Copyright \(co 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+.br

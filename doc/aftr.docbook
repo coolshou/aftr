@@ -1,0 +1,191 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+              "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+              [<!ENTITY mdash "&#8212;">]>
+<!--
+ - Copyright (C) 2009-2010  Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<!-- File:  $Id: aftr.docbook 1001 2010-11-30 18:56:00Z pselkirk $ -->
+<refentry id="man.aftr">
+  <refentryinfo>
+     <date>Jan 14, 2010</date>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle><application>aftr</application></refentrytitle>
+    <manvolnum>8</manvolnum>
+    <refmiscinfo>AFTR</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname><application>aftr</application></refname>
+    <refpurpose>Address Family Transition Router</refpurpose>
+  </refnamediv>
+
+  <docinfo>
+    <copyright>
+      <year>2009</year>
+      <year>2010</year>
+      <holder>Internet Systems Consortium, Inc. ("ISC")</holder>
+    </copyright>
+  </docinfo>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>aftr</command>
+      <arg><option>-g</option></arg>
+      <arg><option>-t</option></arg>
+      <arg><option>-c <replaceable class="parameter">config-file</replaceable></option></arg>
+      <arg><option>-d <replaceable class="parameter">device-name</replaceable></option></arg>
+      <arg><option>-p <replaceable class="parameter">port-number</replaceable></option></arg>
+      <arg><option>-s <replaceable class="parameter">script-file</replaceable></option></arg>
+      <arg><option>-u <replaceable class="parameter">socket-name</replaceable></option></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>-g</term>
+        <listitem>
+          <para>
+            By default the aftr process becomes a daemon,
+            <option>-g</option> keeps it in foreground with logging to stderr.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-t</term>
+        <listitem>
+          <para>
+            <option>-t</option> can be used to check a configuration file.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-c <replaceable class="parameter">config-file</replaceable></term>
+        <listitem>
+          <para>
+            The <command>aftr</command> daemon requires a configuration file.
+            By default it is named <filename>aftr.conf</filename>, and is
+            located in <varname>$src_path</varname>.  The
+            <varname>AFTRCONFIG</varname> environment
+            variable and the <option>-c</option> argument give an
+            alternate path.  A sample configuration file is provided in
+            <filename>$src_path/conf/aftr.conf</filename> (OS independent).
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-d <replaceable class="parameter">device-name</replaceable></term>
+        <listitem>
+          <para>
+             Linux: The aftr process opens <filename>/dev/net/tun</filename>
+             and set the name of the interface to the
+             <varname>AFTRDEVICE</varname> environment
+             variable or the <option>-d</option> command line argument value
+             or by default 'tun0'.
+          </para>
+          <para>
+            FreeBSD: The aftr process opens <filename>/dev/tunXXX</filename>
+            from the <varname>AFTRDEVICE</varname> environment variable or
+            the <option>-d</option> command or by default
+            <filename>/dev/tun0</filename>. The 'auto' value uses the first
+            free <filename>/dev/tunXXX</filename> device.
+          </para>
+          <para>
+            The tunnel interface/device specification can be a full path
+            (<filename>/dev/...</filename>), a relative name or a number.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-p <replaceable class="parameter">port-number</replaceable></term>
+        <listitem>
+          <para>
+            Use the <replaceable class="parameter">port-number</replaceable>
+            for TCP control channels. Default is 1015.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-s <replaceable class="parameter">script-file</replaceable></term>
+        <listitem>
+          <para>
+            The <command>aftr</command> daemon executes a shell script file
+            with <option>start</option> on invocation.
+            This is named by default <filename>aftr-script</filename> and
+            located in <varname>$src_path</varname>. The
+            <varname>AFTRSCRIPT</varname> environment variable and
+            the <option>-s</option> argument give
+            an alternate path. This file could be even empty, but must exist.
+          </para>
+          <para>
+            The <command>aftr</command> daemon will eventually execute
+            the shell script file with the <option>stop</option> argument
+            before it exits.
+          </para>
+          <para>
+            The <filename>conf</filename> directory provides examples
+            (including the configuration files used in our
+            testbeds). <filename>aftr-script.freebsd</filename>
+            variant is for a FreeBSD based AFTR.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-u <replaceable class="parameter">socket-name</replaceable></term>
+        <listitem>
+          <para>
+            As an alternative to TCP over IPv4 and IPv6 with localhost
+            control channels, the <command>aftr</command> process can
+            accept PF_UNIX stream socket control channel on the
+            <replaceable class="parameter">socket-name</replaceable>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+    <citerefentry>
+      <refentrytitle>aftr.conf</refentrytitle>
+      <manvolnum>5</manvolnum>
+    </citerefentry>,
+    <citerefentry>
+      <refentrytitle>aftr.commands</refentrytitle>
+      <manvolnum>5</manvolnum>
+    </citerefentry>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+    <para><corpauthor>Internet Systems Consortium</corpauthor></para>
+  </refsect1>
+
+</refentry>

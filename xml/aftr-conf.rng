@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (C) 2010  Internet Systems Consortium, Inc. ("ISC")
+  
+  Permission to use, copy, modify, and/or distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+  
+  THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+  AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+  OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+  PERFORMANCE OF THIS SOFTWARE.
+-->
+<!--
+  Relax NG compact schema for AFTR config
+  Paul.Selkirk@isc.org, May 2010
+  $Id: aftr-conf.rng 944 2010-10-19 20:12:30Z pselkirk $
+-->
+<grammar xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <define name="rpc">
+    <element name="rpc">
+      <optional>
+        <attribute name="message-id"/>
+      </optional>
+      <choice>
+        <ref name="create"/>
+        <ref name="delete"/>
+        <ref name="get"/>
+        <ref name="flush"/>
+      </choice>
+    </element>
+  </define>
+  <define name="create">
+    <element name="create">
+      <ref name="binding"/>
+    </element>
+  </define>
+  <define name="delete">
+    <element name="delete">
+      <ref name="binding"/>
+    </element>
+  </define>
+  <define name="get">
+    <element name="get">
+      <optional>
+        <attribute name="tunnel">
+          <ref name="ipv6Address"/>
+        </attribute>
+      </optional>
+    </element>
+  </define>
+  <define name="flush">
+    <element name="flush">
+      <empty/>
+    </element>
+  </define>
+  <define name="rpc-reply">
+    <element name="rpc-reply">
+      <optional>
+        <attribute name="message-id"/>
+      </optional>
+      <choice>
+        <ref name="ok"/>
+        <ref name="rpc-error"/>
+        <ref name="conf"/>
+      </choice>
+    </element>
+  </define>
+  <define name="ok">
+    <element name="ok">
+      <empty/>
+    </element>
+  </define>
+  <define name="rpc-error">
+    <element name="rpc-error">
+      <element name="error-message">
+        <text/>
+      </element>
+    </element>
+  </define>
+  <define name="conf">
+    <element name="conf">
+      <interleave>
+        <zeroOrMore>
+          <element name="natEntry">
+            <ref name="binding"/>
+          </element>
+        </zeroOrMore>
+        <zeroOrMore>
+          <element name="tunnelEntry">
+            <ref name="tunnel"/>
+          </element>
+        </zeroOrMore>
+      </interleave>
+    </element>
+  </define>
+  <define name="ipv4Address">
+    <data type="string">
+      <param name="pattern">[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}</param>
+    </data>
+  </define>
+  <define name="ipv6Address">
+    <data type="string">
+      <param name="pattern">[A-Fa-f0-9:]+</param>
+    </data>
+  </define>
+  <define name="port">
+    <data type="decimal">
+      <param name="minInclusive">1</param>
+      <param name="maxInclusive">65535</param>
+    </data>
+  </define>
+  <define name="binding">
+    <element name="tunnel">
+      <ref name="ipv6Address"/>
+    </element>
+    <element name="protocol">
+      <choice>
+        <value>tcp</value>
+        <value>udp</value>
+      </choice>
+    </element>
+    <element name="sourceAddress">
+      <ref name="ipv4Address"/>
+    </element>
+    <element name="sourcePort">
+      <ref name="port"/>
+    </element>
+    <element name="nattedAddress">
+      <ref name="ipv4Address"/>
+    </element>
+    <element name="nattedPort">
+      <ref name="port"/>
+    </element>
+  </define>
+  <define name="tunnel">
+    <element name="tunnel">
+      <ref name="ipv6Address"/>
+    </element>
+    <element name="nattedAddress">
+      <ref name="ipv4Address"/>
+    </element>
+  </define>
+</grammar>

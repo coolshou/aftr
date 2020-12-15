@@ -1,0 +1,108 @@
+Copyright (C) 2009  Internet Systems Consortium, Inc. ("ISC")
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+$Id: README.static-bindings 213 2009-07-07 15:23:03Z sra $
+
+
+A special note about static bindings for people not using CPE everyday.
+
+I describe here what are static bindings (for) from my experience
+with two CPEs, the "Freebox" which is a setup box provided by Free,
+the second ADSL provider in France (and the most technically advanced
+one, 4-play from some years, IPv6, CPL, 802.11n, etc) and the very
+classical WRT54G (with its original firmware).
+
+References:
+(Freebox (in French), WRT54GL user guide, and for the fun or to explain
+the origin of terms Cisco PIX/ASA 7.x technical note)
+
+http://www.free.fr/assistance/579--3-routeur-options-avancees.html
+
+http://downloads.linksysbycisco.com/downloads/WRT54GL-11_UG_A-WEB.pdf
+(page 16)
+
+https://www.cisco.com/en/US/products/hw/vpndevc/ps2030/products_tech_note09186a00804708b4.shtml
+("Port Redirection(Forwarding) with Statics")
+
+How standard NAT (aka source NAT) works:
+ the customer has some computers using private addresses (P) on a local
+network. The CPE connects this local network to an ISP using an address
+(which can be both static (i.e., never change) and global so I note it G).
+When the customer for instance opens a Web connection to google the NAT
+function of the CPE remaps the source address and port to G and a port
+which is "free" (i.e., which fulfill the requirement the 5-tuple protocol,
+source address, source port, destination address and destination port
+is unique). Note that in general the original source port is free so
+can be used and only the address seems to be translated.
+
+What are static bindings:
+ static binding aka port redirection/forward aka destination NAT solves the
+opposite problem: how to open a new connection from the Internet?
+It is needed to run a local server which must be reachable from the Internet,
+etc.
+ The solution is easy: in place of creating a binding for the first packet
+of a new connection going from a local computer to the Internet, the CGE NAT
+is configured to accept a packet for a specified port and to translate/
+forward it to a local machine on a given port (usually the same if the
+same service is run on only one local machine, i.e., the port is "free").
+This configuration is a static binding template (called static binding)
+which is instantiated by the first packet of a new connection coming
+from the Internet.
+ Seen from the Internet side, this seems like the port x of address G
+is redirected to the port x' of a local machine, so the "port redirection"
+name (which makes a lot of sense when there is only one local machine :-).
+ Note the first translation is done on the destination address and optionally
+on the destination port, so the "destination NAT" name.
+
+For instance on my Freebox I have:
+ - the NAT service (named router service) is enabled
+ - the DHCP service (for local machines) is enabled and configured
+ - some static leases are defined (they are needed to make local machine
+  addresses predictable with DHCP)
+ - the PING answering is enabled (note it should be better to have static
+  bindings for the ICMP echo service because today I can know if my freebox
+  is up from the Internet, nothing about machines behind it)
+ - the WOL (wake-on-lan) proxy is disabled (I don't use it)
+ - the DMZ service is disabled (DMZ is a general version of static bindings,
+  all ports are mapped to the same ports on a given address)
+ - ports 22 (ssh) and 25 (smtp) are redirected to my old server
+ - another port is redirected to ssh on my development machine
+ - some port ranges for video-conference (a port in a range is mapped to
+  itself)
+Note both the Freebox and the WRT54G offers the DMZ and port ranges variant
+of the static bindings. For the GUI the Freebox management web page shows
+for the port redirection: port, protocol (tcp/udp), destination (only
+the local address part is settable), port (redirected value), a delete
+checkable button, and at the end of the list a free entry with an add
+button.
+
+In the user mode the format is copied from the standard NAT layout,
+i.e., protocol, old source address, old source port, new/mapped source
+address, new/mapped port, destination address, port address,
+all these fields for a packet from the customer to the Internet.
+
+So this gives:
+
+nat <index> tcp|udp <IPv4_src> <port_src> <IPv4_new> <port_new>
+
+In the kernel/netfilter mode a DNAT target (cf iptables(8)) is used
+(so the new stuff is in the match part and the src stuff is in
+the DNAT target "--to-destination" option).
+
+For testing I use ping and ttcp (so the ttcp.c source is provided,
+ttcp -t <address> for the client, ttcp -r for the server, -u for UDP,
+-p <port> for a specific port (default is 5001)). The related ICMPs
+are "port unreachable" error from UDP packets sent to a non existent
+server, seen by tcpdump (note TCP send resets and no ICMP, and UDP
+applications are not connected so don't get ICMPs themselves).

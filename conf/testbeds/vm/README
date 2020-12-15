@@ -1,0 +1,63 @@
+Copyright (C) 2009  Internet Systems Consortium, Inc. ("ISC")
+
+Permission to use, copy, modify, and/or distribute this software for any
+purpose with or without fee is hereby granted, provided that the above
+copyright notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+PERFORMANCE OF THIS SOFTWARE.
+
+$Id: README 553 2009-12-21 15:56:43Z fdupont $
+
+This directory contains configuration and description files from a testbed.
+The list is:
+ - README: this file
+ - README.shareone: specific explaination about the shared one public
+  address for the AFTR case.
+ - aftr-all.conf: all possible configuration commands
+ - aftr.conf: commented configuration example from the AFTR box
+ - aftr-ifcfg-eth1: /etc/sysconfig/network-script/ifcfg-eth1 file on
+  the Fedora AFTR box
+ - aftr-ifcfg-eth2: same for the eth2 interface
+ - aftr-ifcfg-eth3: same for the eth3 interface
+ - aftr-network: /etc/sysconfig/network file on the Fedora AFTR box
+ - aftr-nonat.conf: specialized configuration example with a no-nat B4
+ - aftr-script: script example from the Fedora AFTR box
+ - aftr-shareone.conf: special configuration example for an AFTR
+  sharing one public address for everything.
+ - aftr-shareone-script: special script example for an AFTR sharing one
+  public address for everything (the magic, using netfilter/iptable
+  to NAT again to the shared public address, is in this file).
+ - dst3-interfaces: /etc/network/interfaces file on the Ubuntu DST3 box
+ - dst3-script: routing configuration script on the Ubuntu DST3 box
+ - freebsd-aftr-rc.conf: /etc/rc.conf file on the FreeBSD AFTR box
+ - freebsd-aftr-script: script example from the FreeBSD box
+ - freebsd-b4-rc.conf: /etc/rc.conf file on the FreeBSD server based B4 box
+ - freebsd-b4-script: script example from the FreeBSD server based B4 box
+ - ha+p-interfaces: /etc/network/interfaces file on the Ubuntu HA+P box
+ - ha+p-script: system configuration script on the Ubuntu HA+P box
+  (this box is a standalone B4 so the script contains an iptables setup)
+ - interactive-all: all possible interactive commands
+ - lsb4-interfaces: /etc/network/interfaces file on the Ubuntu server
+  based B4 box
+ - lsb4-modules: /etc/modules file on the Ubuntu server based B4 box
+ - lsb4-script: routing configuration script on the Ubuntu server based B4 box
+ - lsb4-sysctl.conf.diff: /etc/sysctl.conf diff on the Ubuntu server
+  based B4 box
+ - na+p-interfaces: /etc/network/interfaces file on the Ubuntu NA+P box
+ - na+p-script: system configuration script on the Ubuntu NA+P box
+  (this box is a B4 so the script contains an iptables setup)
+ - sa+p-interfaces: /etc/network/interfaces file on the Ubuntu SA+P box
+ - sa+p-script: routing configuration script on the Ubuntu SA+P box
+ - schema: description of the basic testbed (with SRC[12] and DST3)
+ - schema+a+p: description of the A+P testbed (with [HNS]A+P)
+ - src1-interfaces: /etc/network/interfaces file on the Ubuntu SRC1 box
+ - src1-script: routing configuration script on the Ubuntu SRC1 box
+ - src4-interfaces: /etc/network/interfaces file on the Ubuntu SRC4 box
+  (client of the server based B4)
+ - src4-script: routing configuration script on the Ubuntu SRC4 box

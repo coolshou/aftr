@@ -1,0 +1,146 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+              "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+              [<!ENTITY mdash "&#8212;">]>
+<!--
+ - Copyright (C) 2010  Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+
+<!-- File:  $Id: aftr.docbook 883 2010-10-05 21:03:22Z pselkirk $ -->
+<refentry>
+  <refentryinfo>
+     <date>October 10, 2010</date>
+  </refentryinfo>
+
+  <refmeta>
+    <refentrytitle><application>xmlconf.py</application></refentrytitle>
+    <manvolnum>8</manvolnum>
+    <refmiscinfo>AFTR</refmiscinfo>
+  </refmeta>
+
+  <refnamediv>
+    <refname><application>xmlconf.py</application></refname>
+    <refpurpose>remote configuration daemon for aftr</refpurpose>
+  </refnamediv>
+
+  <docinfo>
+    <copyright>
+      <year>2010</year>
+      <holder>Internet Systems Consortium, Inc. ("ISC")</holder>
+    </copyright>
+  </docinfo>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>xmlconf.py</command>
+      <arg><option>-l <replaceable class="parameter">listening-addr</replaceable></option></arg>
+      <arg><option>-p <replaceable class="parameter">listening-port</replaceable></option></arg>
+      <arg><option>-r <replaceable class="parameter">remote-addr</replaceable></option></arg>
+      <arg><option>-c <replaceable class="parameter">config-file</replaceable></option></arg>
+      <arg><option>-v</option></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1>
+    <title>OPTIONS</title>
+
+    <variablelist>
+      <varlistentry>
+        <term>-l <replaceable class="parameter">listening-addr</replaceable></term>
+        <listitem>
+          <para>
+	    This specifies a local address on which to listen.  If not
+	    specified, it listens on all local addresses.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-p <replaceable class="parameter">listening-port</replaceable></term>
+        <listitem>
+          <para>
+	    This specifies a local port on which to listen.  Defaults
+	    to port 4148 for HTTP transport, or port 4146 for socket
+	    transport.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-r <replaceable class="parameter">remote-addr</replaceable></term>
+        <listitem>
+          <para>
+	    This specifies a single address that the server will
+	    listen to.  The server should only get configuration
+	    requests from the provisioning system, at a known address,
+	    so this is a simple form of access control.  Use of this
+	    option is not required, but it is recommended.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-c <replaceable class="parameter">config-file</replaceable></term>
+        <listitem>
+          <para>
+	    This specifies the name and location of
+	    the <command>aftr</command> configuration file.  For
+	    obvious reasons, this option MUST specify the same file
+	    that is used to configure the running
+	    <command>aftr</command> daemon.  Default is
+	    <filename>./aftr.conf</filename>.
+          </para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>-v</term>
+        <listitem>
+          <para>
+	    This enables run-time debugging messages.  It should not
+	    be used in production, but it can help to debug or monitor
+	    interactions between <command>xmlconf.py</command> and
+	    the <command>aftr</command> daemon.
+          </para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+
+  </refsect1>
+
+  <refsect1>
+    <title>SEE ALSO</title>
+    <para>
+    <citerefentry>
+      <refentrytitle>aftr</refentrytitle>
+      <manvolnum>8</manvolnum>
+    </citerefentry>,
+    <citerefentry>
+      <refentrytitle>aftr.conf</refentrytitle>
+      <manvolnum>5</manvolnum>
+    </citerefentry>,
+    <citerefentry>
+      <refentrytitle>xmlclient</refentrytitle>
+      <manvolnum>8</manvolnum>
+    </citerefentry>
+    </para>
+  </refsect1>
+
+  <refsect1>
+    <title>AUTHOR</title>
+    <para><corpauthor>Internet Systems Consortium</corpauthor></para>
+  </refsect1>
+
+</refentry>

@@ -1,0 +1,87 @@
+# Copyright (C) 2009  Internet Systems Consortium, Inc. ("ISC")
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+# REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+# AND FITNESS.  IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+# INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+# LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+# OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+# PERFORMANCE OF THIS SOFTWARE.
+
+# $Id: interactive-all 1001 2010-11-30 18:56:00Z pselkirk $
+
+# contains all possible interactive (only) lines
+
+session config off
+session config on
+session help
+session log off
+session log on
+session name
+session notify on
+session notify off
+help
+help all
+reload
+show dropped
+show help
+show stat
+
+noop
+echo foobar
+debug check
+debug check nat
+debug check nonat
+debug check pool
+debug check session
+debug check tunnel
+debug disable
+debug disable clear
+debug dropped
+debug enable 2001:0:0:1::1
+debug fragment IPv6
+debug fragment in
+debug fragment out
+#debug fragment xxx
+debug hash
+debug help
+debug nat
+#debug nat xxx
+debug pool
+debug session
+debug stat
+debug tunnel
+debug tunnel 2001:0:0:1::1
+delete help
+list acl6
+list default
+list help
+list nat
+list nat conf
+list nat static
+list nat prr
+list nat dynamic
+list nat all
+list nat global
+list nonat
+list pool
+list session
+list session foo
+list session 123
+list tunnel
+
+#
+
+session name foo
+session close
+session close foo
+session close 123
+reload
+reboot
+fork
+kill
+abort

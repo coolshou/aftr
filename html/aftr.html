@@ -1,0 +1,125 @@
+<!--
+ - Copyright (C) 2009, 2010 Internet Systems Consortium, Inc. ("ISC")
+ - 
+ - Permission to use, copy, modify, and/or distribute this software for any
+ - purpose with or without fee is hereby granted, provided that the above
+ - copyright notice and this permission notice appear in all copies.
+ - 
+ - THE SOFTWARE IS PROVIDED "AS IS" AND ISC DISCLAIMS ALL WARRANTIES WITH
+ - REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+ - AND FITNESS. IN NO EVENT SHALL ISC BE LIABLE FOR ANY SPECIAL, DIRECT,
+ - INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+ - LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+ - OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ - PERFORMANCE OF THIS SOFTWARE.
+-->
+<!-- $Id$ -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>aftr</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry" title="aftr">
+<a name="man.aftr"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2>Name</h2>
+<p><span class="application">aftr</span> &#8212; Address Family Transition Router</p>
+</div>
+<div class="refsynopsisdiv" title="Synopsis">
+<h2>Synopsis</h2>
+<div class="cmdsynopsis"><p><code class="command">aftr</code>  [<code class="option">-g</code>] [<code class="option">-t</code>] [<code class="option">-c <em class="replaceable"><code>config-file</code></em></code>] [<code class="option">-d <em class="replaceable"><code>device-name</code></em></code>] [<code class="option">-p <em class="replaceable"><code>port-number</code></em></code>] [<code class="option">-s <em class="replaceable"><code>script-file</code></em></code>] [<code class="option">-u <em class="replaceable"><code>socket-name</code></em></code>]</p></div>
+</div>
+<div class="refsect1" title="OPTIONS">
+<a name="id3022692"></a><h2>OPTIONS</h2>
+<div class="variablelist"><dl>
+<dt><span class="term">-g</span></dt>
+<dd><p>
+            By default the aftr process becomes a daemon,
+            <code class="option">-g</code> keeps it in foreground with logging to stderr.
+          </p></dd>
+<dt><span class="term">-t</span></dt>
+<dd><p>
+            <code class="option">-t</code> can be used to check a configuration file.
+          </p></dd>
+<dt><span class="term">-c <em class="replaceable"><code>config-file</code></em></span></dt>
+<dd><p>
+            The <span class="command"><strong>aftr</strong></span> daemon requires a configuration file.
+            By default it is named <code class="filename">aftr.conf</code>, and is
+            located in <code class="varname">$src_path</code>.  The
+            <code class="varname">AFTRCONFIG</code> environment
+            variable and the <code class="option">-c</code> argument give an
+            alternate path.  A sample configuration file is provided in
+            <code class="filename">$src_path/conf/aftr.conf</code> (OS independent).
+          </p></dd>
+<dt><span class="term">-d <em class="replaceable"><code>device-name</code></em></span></dt>
+<dd>
+<p>
+             Linux: The aftr process opens <code class="filename">/dev/net/tun</code>
+             and set the name of the interface to the
+             <code class="varname">AFTRDEVICE</code> environment
+             variable or the <code class="option">-d</code> command line argument value
+             or by default 'tun0'.
+          </p>
+<p>
+            FreeBSD: The aftr process opens <code class="filename">/dev/tunXXX</code>
+            from the <code class="varname">AFTRDEVICE</code> environment variable or
+            the <code class="option">-d</code> command or by default
+            <code class="filename">/dev/tun0</code>. The 'auto' value uses the first
+            free <code class="filename">/dev/tunXXX</code> device.
+          </p>
+<p>
+            The tunnel interface/device specification can be a full path
+            (<code class="filename">/dev/...</code>), a relative name or a number.
+          </p>
+</dd>
+<dt><span class="term">-p <em class="replaceable"><code>port-number</code></em></span></dt>
+<dd><p>
+            Use the <em class="replaceable"><code>port-number</code></em>
+            for TCP control channels. Default is 1015.
+          </p></dd>
+<dt><span class="term">-s <em class="replaceable"><code>script-file</code></em></span></dt>
+<dd>
+<p>
+            The <span class="command"><strong>aftr</strong></span> daemon executes a shell script file
+            with <code class="option">start</code> on invocation.
+            This is named by default <code class="filename">aftr-script</code> and
+            located in <code class="varname">$src_path</code>. The
+            <code class="varname">AFTRSCRIPT</code> environment variable and
+            the <code class="option">-s</code> argument give
+            an alternate path. This file could be even empty, but must exist.
+          </p>
+<p>
+            The <span class="command"><strong>aftr</strong></span> daemon will eventually execute
+            the shell script file with the <code class="option">stop</code> argument
+            before it exits.
+          </p>
+<p>
+            The <code class="filename">conf</code> directory provides examples
+            (including the configuration files used in our
+            testbeds). <code class="filename">aftr-script.freebsd</code>
+            variant is for a FreeBSD based AFTR.
+          </p>
+</dd>
+<dt><span class="term">-u <em class="replaceable"><code>socket-name</code></em></span></dt>
+<dd><p>
+            As an alternative to TCP over IPv4 and IPv6 with localhost
+            control channels, the <span class="command"><strong>aftr</strong></span> process can
+            accept PF_UNIX stream socket control channel on the
+            <em class="replaceable"><code>socket-name</code></em>.
+          </p></dd>
+</dl></div>
+</div>
+<div class="refsect1" title="SEE ALSO">
+<a name="id3022958"></a><h2>SEE ALSO</h2>
+<p>
+    <span class="citerefentry"><span class="refentrytitle">aftr.conf</span>(5)</span>,
+    <span class="citerefentry"><span class="refentrytitle">aftr.commands</span>(5)</span>
+    </p>
+</div>
+<div class="refsect1" title="AUTHOR">
+<a name="id3022987"></a><h2>AUTHOR</h2>
+<p><span class="corpauthor">Internet Systems Consortium</span></p>
+</div>
+</div></body>
+</html>
