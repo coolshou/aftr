@@ -3,10 +3,13 @@
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
+export CC=gcc-9
 
 %:
-	dh $@ 
+	dh $@
 
 override_dh_auto_install:
-	mkdir -p debian/aftr/usr/bin/
-	cp aftr debian/aftr/usr/bin/
+	mkdir -p debian/aftr/etc/aftr/
+	cp conf/aftr-script.linux  debian/aftr/etc/aftr/aftr-script
+	mkdir -p debian/aftr/etc/modules-load.d/
+	cp conf/b4-ubuntu/etc_modules debian/aftr/etc/modules-load.d/aftr.conf

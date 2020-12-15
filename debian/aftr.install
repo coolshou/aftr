@@ -1,0 +1,3 @@
+aftr /usr/bin/
+conf/aftr.conf  /etc/aftr/
+conf/90-forwarding.conf /etc/sysctl.d/
